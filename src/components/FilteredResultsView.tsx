@@ -1,6 +1,7 @@
 import React from 'react';
 import type { TreeNodeDelta, NodeId, ScanSummary } from '../types';
 import { FORMAT_SIZE } from '../constants';
+import SmartDeleteButton from './SmartDeleteButton';
 
 interface TreeNodeMap {
   [id: number]: TreeNodeDelta & { children: NodeId[] };
@@ -11,9 +12,10 @@ interface FilteredResultsViewProps {
   onClearFilter: () => void;
   treeNodes: TreeNodeMap;
   summary: ScanSummary | null;
+  onRescan?: () => void;
 }
 
-const FilteredResultsView: React.FC<FilteredResultsViewProps> = ({ extension, onClearFilter, treeNodes, summary: _summary }) => {
+const FilteredResultsView: React.FC<FilteredResultsViewProps> = ({ extension, onClearFilter, treeNodes, summary: _summary, onRescan }) => {
   // Filter files by extension
   const filteredFiles = React.useMemo(() => {
     const normalizedExt = extension.replace(/^\./, '').toLowerCase();
@@ -44,36 +46,23 @@ const FilteredResultsView: React.FC<FilteredResultsViewProps> = ({ extension, on
   }, [filteredFiles, totalSize]);
 
   return (
-    <div className="flex-1 flex flex-col bg-background-light dark:bg-background-dark p-8 overflow-auto min-h-screen">
+    <div className="app-shell flex-1 flex flex-col p-8 overflow-auto min-h-screen">
       <div className="max-w-[1400px] mx-auto w-full space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-              <span className="hover:text-secondary cursor-pointer transition-colors">Workspace</span>
-              <span className="material-symbols-outlined text-xs">chevron_right</span>
-              <span className="hover:text-secondary cursor-pointer transition-colors">Media Library</span>
-              <span className="material-symbols-outlined text-xs">chevron_right</span>
-              <span className="text-secondary">.{extension.replace(/^\./, '')} Registry</span>
-            </div>
-            <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Filtered Assets: .{extension.replace(/^\./, '')}</h1>
-            <p className="text-slate-500 font-medium">Isolating <span className="text-slate-900 dark:text-white font-bold">{fileCount.toLocaleString()} objects</span> representing <span className="text-secondary font-black">{FORMAT_SIZE(totalSize)}</span> of storage volume.</p>
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">.{extension.replace(/^\./, '')} files</h1>
+            <p className="text-slate-500 dark:text-slate-300 font-medium">{fileCount.toLocaleString()} files using {FORMAT_SIZE(totalSize)}.</p>
           </div>
           
-          <div className="flex gap-3">
-            <button onClick={onClearFilter} className="h-11 px-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center gap-3">
-              <span className="material-symbols-outlined text-sm">filter_list_off</span>
-              Reset Filter
-            </button>
-            <button className="h-11 px-6 rounded-xl bg-secondary text-white text-xs font-black uppercase tracking-widest shadow-xl shadow-secondary/30 hover:brightness-110 transition-all flex items-center gap-3">
-              <span className="material-symbols-outlined text-sm">delete_forever</span>
-              Purge Extension
-            </button>
-          </div>
+          <button onClick={onClearFilter} className="h-11 px-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center gap-3 w-fit">
+            <span className="material-symbols-outlined text-sm">filter_list_off</span>
+            Reset Filter
+          </button>
         </div>
 
         <div className="grid grid-cols-12 gap-8">
           <div className="col-span-12 lg:col-span-4 space-y-6">
-            <div className="bg-white dark:bg-panel-dark rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl">
+            <div className="app-surface rounded-2xl border p-6 shadow-xl">
               <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center justify-between">
                 Category Distribution
                 <span className="material-symbols-outlined text-base">info</span>
@@ -93,21 +82,21 @@ const FilteredResultsView: React.FC<FilteredResultsViewProps> = ({ extension, on
               </div>
             </div>
 
-            <div className="bg-white dark:bg-panel-dark rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl flex items-center gap-6">
+            <div className="app-surface rounded-2xl border p-6 shadow-xl flex items-center gap-6">
               <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary">
                  <span className="material-symbols-outlined text-3xl">security</span>
               </div>
               <div>
-                <h4 className="font-black text-slate-900 dark:text-white text-sm">Storage Health Index</h4>
-                <p className="text-slate-400 text-xs mt-1">This extension is optimally distributed across nodes.</p>
+                <h4 className="font-black text-slate-900 dark:text-white text-sm">Quick note</h4>
+                <p className="text-slate-400 text-xs mt-1">Delete only files you recognize.</p>
               </div>
             </div>
           </div>
 
           <div className="col-span-12 lg:col-span-8">
-             <div className="bg-white dark:bg-panel-dark rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
-               <div className="px-8 py-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-black/10">
-                 <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Matched Object Registry</h3>
+             <div className="app-surface rounded-2xl border shadow-xl overflow-hidden">
+               <div className="app-surface-muted px-8 py-5 border-b">
+                 <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-300">Matched Files</h3>
                </div>
                <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
                 <table className="w-full text-left">
@@ -133,7 +122,13 @@ const FilteredResultsView: React.FC<FilteredResultsViewProps> = ({ extension, on
                           <span className="text-[11px] font-mono text-slate-400 truncate block max-w-[200px]">{file.path}</span>
                         </td>
                         <td className="px-8 py-5 text-right">
-                          <button className="material-symbols-outlined text-slate-300 hover:text-red-500 transition-colors">delete</button>
+                          <SmartDeleteButton
+                            path={file.path}
+                            name={file.name}
+                            title={`Delete ${file.name}`}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-500"
+                            onDeleted={() => onRescan?.()}
+                          />
                         </td>
                       </tr>
                     ))}

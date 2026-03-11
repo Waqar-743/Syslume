@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { ScanSummary, TreeNodeDelta, NodeId } from '../types';
 import { FORMAT_SIZE } from '../constants';
 import { invoke } from '@tauri-apps/api/core';
+import type { FileInfo } from '../types';
 import Treemap from './Treemap';
 import DirectoryTree from './DirectoryTree';
 import FileTable from './FileTable';
@@ -96,6 +97,13 @@ const DashboardView: React.FC<DashboardViewProps> = ({
 
   const handleDelete = useCallback(async (path: string, toTrash: boolean) => {
     try {
+      const fileInfo = await invoke<FileInfo>('get_file_details', { path });
+
+      if (fileInfo.safety_level === 'Protected') {
+        setNotification({ message: 'Protected system files cannot be deleted', type: 'error' });
+        return;
+      }
+
       await invoke('delete_path', { path, toTrash });
       setNotification({ 
         message: toTrash ? 'Moved to Trash' : 'Deleted permanently', 
@@ -130,7 +138,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({
   const totalDirs = summary?.total_dirs ?? 0;
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-background-light dark:bg-background-dark overflow-hidden min-h-screen">
+    <div className="app-shell flex-1 flex flex-col h-full overflow-hidden min-h-screen">
       {/* Notification Toast */}
       {notification && (
         <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-slide-in ${
@@ -159,15 +167,15 @@ const DashboardView: React.FC<DashboardViewProps> = ({
       )}
 
       {/* Navigation Strip */}
-      <div className="flex items-center justify-between px-8 py-3 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-panel-dark/30 backdrop-blur-md shrink-0">
+      <div className="app-surface-muted flex items-center justify-between px-8 py-3 border-b backdrop-blur-md shrink-0">
         <div className="flex items-center gap-4 text-xs font-semibold">
-          <div className="flex items-center gap-2 text-slate-500">
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-300">
             <span className="material-symbols-outlined text-base">domain</span>
             Node:
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-slate-900 dark:text-white">ROOT</span>
-            <span className="text-slate-300 dark:text-slate-700">/</span>
+            <span className="text-slate-300 dark:text-slate-400">/</span>
             <span className="text-secondary font-black">{rootPath ?? 'UNSET'}</span>
           </div>
         </div>
@@ -205,7 +213,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-8 py-3 border-b border-slate-200 dark:border-slate-800 bg-white/30 dark:bg-panel-dark/20 shrink-0">
+      <div className="app-surface-muted flex items-center justify-between px-8 py-3 border-b shrink-0">
         {/* Search Bar */}
         <div className="flex-1 max-w-md">
           <SearchBar
@@ -217,13 +225,13 @@ const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* View Mode Toggle */}
-        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
+        <div className="app-surface flex items-center gap-1 rounded-xl p-1 border">
           <button
             onClick={() => setViewMode('treemap')}
             className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
               viewMode === 'treemap'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                ? 'app-surface-muted text-slate-900 dark:text-white shadow-sm'
+                : 'text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white'
             }`}
           >
             <span className="material-symbols-outlined text-base align-middle mr-1">grid_view</span>
@@ -233,8 +241,8 @@ const DashboardView: React.FC<DashboardViewProps> = ({
             onClick={() => setViewMode('tree')}
             className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
               viewMode === 'tree'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                ? 'app-surface-muted text-slate-900 dark:text-white shadow-sm'
+                : 'text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white'
             }`}
           >
             <span className="material-symbols-outlined text-base align-middle mr-1">account_tree</span>
@@ -244,8 +252,8 @@ const DashboardView: React.FC<DashboardViewProps> = ({
             onClick={() => setViewMode('table')}
             className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
               viewMode === 'table'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                ? 'app-surface-muted text-slate-900 dark:text-white shadow-sm'
+                : 'text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white'
             }`}
           >
             <span className="material-symbols-outlined text-base align-middle mr-1">table_rows</span>
@@ -257,7 +265,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Main Content Area */}
       <div className="flex-1 p-6 grid grid-cols-12 gap-6 overflow-hidden min-h-0">
         {/* Main Visualization */}
-        <section className="col-span-12 lg:col-span-9 bg-white dark:bg-panel-dark rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col">
+        <section className="app-surface col-span-12 lg:col-span-9 rounded-2xl border shadow-2xl overflow-hidden flex flex-col">
           <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
             <h2 className="font-black text-sm uppercase tracking-widest flex items-center gap-3">
               <span className="w-1 h-4 bg-secondary rounded-full"></span>
@@ -309,13 +317,18 @@ const DashboardView: React.FC<DashboardViewProps> = ({
                 extensionFilter={highlightExtension}
                 sizeFilter={sizeFilter}
                 maxHeight="100%"
+                onDeleteComplete={(_path, name) => {
+                  setNotification({ message: `${name} deleted`, type: 'success' });
+                  onRescan?.();
+                }}
+                onDeleteError={(message) => setNotification({ message, type: 'error' })}
               />
             )}
           </div>
         </section>
 
         {/* Right Sidebar - Extension Legend */}
-        <section className="col-span-12 lg:col-span-3 bg-white dark:bg-panel-dark rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col">
+        <section className="app-surface col-span-12 lg:col-span-3 rounded-2xl border shadow-2xl overflow-hidden flex flex-col">
           <ExtensionLegend
             treeNodes={treeNodes}
             highlightExtension={highlightExtension}

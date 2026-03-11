@@ -128,12 +128,12 @@ const TreeItem: React.FC<TreeItemProps> = ({
         </span>
 
         {/* Name */}
-        <span className="flex-1 truncate text-sm text-slate-800 dark:text-slate-200">
+        <span className="flex-1 truncate text-sm text-slate-800 dark:text-white">
           {node.name}
         </span>
 
         {/* Size */}
-        <span className="text-xs text-slate-500 tabular-nums">
+        <span className="text-xs text-slate-500 dark:text-slate-300 tabular-nums">
           {FORMAT_SIZE(node.size_bytes)}
         </span>
       </div>
@@ -232,14 +232,14 @@ const DirectoryTree: React.FC<DirectoryTreeProps> = ({
         <div className="flex gap-1">
           <button
             onClick={expandAll}
-            className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
+            className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white transition-colors"
             title="Expand all"
           >
             <span className="material-symbols-outlined text-sm">unfold_more</span>
           </button>
           <button
             onClick={collapseAll}
-            className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
+            className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white transition-colors"
             title="Collapse all"
           >
             <span className="material-symbols-outlined text-sm">unfold_less</span>

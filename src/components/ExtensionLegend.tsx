@@ -175,7 +175,7 @@ const ExtensionLegend: React.FC<ExtensionLegendProps> = ({
                     </div>
 
                     {/* Size */}
-                    <span className="text-xs text-slate-400 tabular-nums flex-shrink-0">
+                    <span className="text-xs text-slate-400 dark:text-slate-300 tabular-nums flex-shrink-0">
                       {FORMAT_SIZE(stat.size)}
                     </span>
                   </button>
@@ -185,7 +185,7 @@ const ExtensionLegend: React.FC<ExtensionLegendProps> = ({
 
             {/* Categories summary */}
             <div className="pt-4 border-t border-slate-200 dark:border-slate-700/50">
-              <h4 className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">By Category</h4>
+              <h4 className="text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wide mb-3">By Category</h4>
               <div className="grid grid-cols-2 gap-2">
                 {categories.map(cat => {
                   const catSize = cat.extensions.reduce((sum, e) => sum + e.size, 0);
@@ -195,8 +195,8 @@ const ExtensionLegend: React.FC<ExtensionLegendProps> = ({
                         className="w-2 h-2 rounded-full"
                         style={{ backgroundColor: cat.color }}
                       />
-                      <span className="text-xs text-slate-600 dark:text-slate-400">{cat.name}</span>
-                      <span className="text-xs text-slate-400 dark:text-slate-500 ml-auto tabular-nums">
+                      <span className="text-xs text-slate-600 dark:text-slate-200">{cat.name}</span>
+                      <span className="text-xs text-slate-400 dark:text-slate-300 ml-auto tabular-nums">
                         {FORMAT_SIZE(catSize)}
                       </span>
                     </div>

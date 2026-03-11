@@ -120,3 +120,38 @@ export function truncatePath(path: string, maxLength = 50): string {
   
   return `${start}/.../${end}`;
 }
+
+const PROTECTED_PATH_SEGMENTS = [
+  'windows',
+  'system32',
+  'syswow64',
+  'program files',
+  'program files (x86)',
+  'programdata',
+  'users',
+  'documents',
+  'pictures',
+  'videos',
+  'music',
+  'downloads',
+  'desktop',
+  'appdata',
+  'boot',
+  'recovery',
+  'system volume information',
+];
+
+export function isLikelyProtectedPath(path: string): boolean {
+  const parts = path
+    .toLowerCase()
+    .split(/[/\\]/)
+    .filter(Boolean);
+
+  return PROTECTED_PATH_SEGMENTS.some((segment) => {
+    if (!parts.includes(segment)) {
+      return false;
+    }
+
+    return parts.length <= 3 || parts.indexOf(segment) <= 2;
+  });
+}

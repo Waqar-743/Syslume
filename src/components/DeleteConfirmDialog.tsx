@@ -96,7 +96,7 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="p-3 rounded-xl bg-slate-700/30">
               <div className="text-slate-400 text-xs mb-1">Size</div>
-              <div className="text-white font-medium">{FORMAT_SIZE(fileInfo.size)}</div>
+              <div className="text-white font-medium">{FORMAT_SIZE(fileInfo.size_bytes ?? fileInfo.size ?? 0)}</div>
             </div>
             {fileInfo.extension && (
               <div className="p-3 rounded-xl bg-slate-700/30">

@@ -39,12 +39,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            className="w-full pl-10 pr-10 py-2.5 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 transition-all"
+            className="app-surface w-full pl-10 pr-10 py-2.5 rounded-xl app-text-primary placeholder-slate-500 border focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 transition-all"
           />
           {value && (
             <button
               onClick={() => onChange('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-secondary transition-colors"
             >
               <span className="material-symbols-outlined text-lg">close</span>
             </button>
@@ -57,7 +57,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           className={`p-2.5 rounded-xl border transition-all ${
             showFilters || sizeFilter !== 'all'
               ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-400'
-              : 'bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:border-slate-600'
+              : 'app-surface text-slate-400 hover:text-secondary'
           }`}
           title="Size filters"
         >
@@ -67,9 +67,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
       {/* Filter dropdown */}
       {showFilters && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-700/50 rounded-xl shadow-2xl z-50 overflow-hidden">
-          <div className="p-3 border-b border-slate-700/50">
-            <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wide">Size Filter</h4>
+        <div className="app-surface absolute top-full left-0 right-0 mt-2 border rounded-xl shadow-2xl z-50 overflow-hidden">
+          <div className="p-3 border-b border-slate-200 dark:border-slate-700/50">
+            <h4 className="text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wide">Size Filter</h4>
           </div>
           <div className="p-2">
             {sizeOptions.map(option => (
@@ -82,7 +82,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${
                   sizeFilter === option.value
                     ? 'bg-cyan-500/20 text-cyan-400'
-                    : 'text-slate-300 hover:bg-slate-700/50'
+                    : 'app-text-primary hover:bg-slate-100 dark:hover:bg-slate-700/50'
                 }`}
               >
                 <div className="flex items-center gap-2">

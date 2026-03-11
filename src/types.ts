@@ -161,11 +161,12 @@ export interface DeleteResult {
 export interface FileInfo {
   path: string;
   name: string;
-  size: number;
+  size_bytes: number;
   safety_level: SafetyLevel;
   is_dir: boolean;
-  modified_days_ago: number | null;
-  extension: string | null;
+  modified_days_ago?: number | null;
+  extension?: string | null;
+  size?: number;
 }
 
 export interface DeletedPayload {

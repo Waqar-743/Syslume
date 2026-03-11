@@ -59,7 +59,7 @@ const ScanningView: React.FC<ScanningViewProps> = ({ progress, targetPath: _targ
   }, [percent]);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-8 bg-background-light dark:bg-background-dark min-h-screen">
+    <div className="app-shell flex-1 flex flex-col items-center justify-center p-8 min-h-screen">
       <div className="w-full max-w-2xl flex flex-col items-center">
         
         {/* Technical Spinner */}

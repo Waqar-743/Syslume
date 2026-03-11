@@ -35,20 +35,20 @@ const Header: React.FC<HeaderProps> = ({
         ? 'bg-black border-white border-b-2' 
         : 'glass border-slate-200 dark:border-slate-800'
     }`}>
-      <div className="max-w-[1400px] mx-auto px-8 h-24 flex items-center justify-between">
+      <div className="max-w-[1400px] mx-auto px-8 h-20 flex items-center justify-between">
         <div className="flex items-center gap-12">
           <div 
             className="flex items-center gap-5 cursor-pointer group" 
             onClick={() => !scanActive && handleNavigate('HOME')}
           >
             <div className="w-12 h-12 flex items-center justify-center transition-all group-hover:scale-105 group-hover:-rotate-3">
-              <img src="/Main-logo.png" alt="DiskSight Logo" className="w-full h-full object-contain" />
+              <img src="/Main-logo.png" alt="DiskSight Logo" className="app-logo w-full h-full object-contain" />
             </div>
             <div className="flex flex-col gap-0.5">
-              <h1 className={`text-2xl font-black tracking-tighter leading-tight ${isContrast ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
+              <h1 className={`text-xl font-black tracking-tighter leading-tight ${isContrast ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
                 DiskSight
               </h1>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Storage Intelligence</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Disk cleanup</span>
             </div>
           </div>
 
@@ -61,7 +61,7 @@ const Header: React.FC<HeaderProps> = ({
                     ? 'bg-black border-white text-white focus:ring-white' 
                     : 'bg-slate-100 dark:bg-slate-900/50 border-transparent focus:bg-white dark:focus:bg-slate-900 border-slate-200 dark:border-slate-700 focus:ring-secondary/10'
                 }`}
-                placeholder="Search localized registry..." 
+                placeholder="Search files" 
                 type="text"
               />
             </div>
@@ -77,17 +77,20 @@ const Header: React.FC<HeaderProps> = ({
             >
               Analytics
             </button>
-            <button 
-              onClick={() => onOpenSettings?.()}
-              className={`transition-colors py-2 hover:text-secondary ${currentView === 'SETTINGS' ? 'text-secondary' : 'text-slate-500 dark:text-slate-400'}`}
-            >
-              Engine Config
-            </button>
           </nav>
           
           <div className={`h-8 w-px hidden md:block ${isContrast ? 'bg-white' : 'bg-slate-200 dark:bg-slate-800'}`}></div>
 
           <div className="flex items-center gap-6">
+            <button
+              onClick={() => onOpenSettings?.()}
+              title="Settings"
+              aria-label="Settings"
+              className={`inline-flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-secondary ${currentView === 'SETTINGS' ? 'text-secondary' : 'text-slate-500 dark:text-slate-400'}`}
+            >
+              <span className="material-symbols-outlined text-lg">settings</span>
+            </button>
+
             {!isHome && !scanActive && (
               <button 
                 onClick={() => handleNavigate('HOME')}

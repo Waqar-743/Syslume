@@ -61,18 +61,13 @@ function App() {
     if (isDark) {
       html.classList.add('dark');
       body.classList.add('dark');
-      html.style.backgroundColor = '#0F172A';
-      body.style.backgroundColor = '#0F172A';
-      body.style.color = '#fff';
-      if (root) root.style.backgroundColor = '#0F172A';
     } else {
       html.classList.remove('dark');
       body.classList.remove('dark');
-      html.style.backgroundColor = '#F8FAFC';
-      body.style.backgroundColor = '#F8FAFC';
-      body.style.color = '#1e293b';
-      if (root) root.style.backgroundColor = '#F8FAFC';
     }
+
+    body.dataset.theme = isDark ? 'dark' : 'light';
+    if (root) root.dataset.theme = isDark ? 'dark' : 'light';
   }, [settings.theme]);
 
   // Load drives on mount
@@ -288,6 +283,7 @@ function App() {
             onClearFilter={handleClearFilter}
             treeNodes={treeNodes}
             summary={summary}
+            onRescan={() => selectedDrive && startScan(selectedDrive)}
           />
         );
       default:
@@ -296,12 +292,13 @@ function App() {
   };
 
   return (
-    <div className="app min-h-screen flex flex-col bg-background-light dark:bg-background-dark transition-colors">
+    <div className="app app-shell min-h-screen flex flex-col transition-colors">
       <Header
         currentView={currentView}
         onNavigate={setCurrentView}
         onOpenSettings={() => setShowSettings(true)}
         scanActive={scanStatus === "scanning"}
+        theme={settings.theme}
       />
       
       {renderView()}

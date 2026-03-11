@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import type { TreeNodeDelta, NodeId } from '../types';
 import { FORMAT_SIZE } from '../constants';
+import SmartDeleteButton from './SmartDeleteButton';
 
 interface TreeNodeMap {
   [id: number]: TreeNodeDelta & { children: NodeId[] };
@@ -20,6 +21,8 @@ interface FileTableProps {
   extensionFilter?: string | null;
   sizeFilter?: 'all' | 'large' | 'medium' | 'small';
   maxHeight?: string;
+  onDeleteComplete?: (path: string, name: string) => void;
+  onDeleteError?: (message: string) => void;
 }
 
 interface FlattenedFile {
@@ -43,6 +46,8 @@ const FileTable: React.FC<FileTableProps> = ({
   extensionFilter,
   sizeFilter = 'all',
   maxHeight = '400px',
+  onDeleteComplete,
+  onDeleteError,
 }) => {
   const [sortField, setSortField] = useState<SortField>('size');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -176,7 +181,7 @@ const FileTable: React.FC<FileTableProps> = ({
 
   const SortIcon: React.FC<{ field: SortField }> = ({ field }) => {
     if (sortField !== field) {
-      return <span className="material-symbols-outlined text-xs text-slate-600">unfold_more</span>;
+      return <span className="material-symbols-outlined text-xs text-slate-600 dark:text-slate-300">unfold_more</span>;
     }
     return (
       <span className="material-symbols-outlined text-xs text-cyan-400">
@@ -206,8 +211,8 @@ const FileTable: React.FC<FileTableProps> = ({
         style={{ maxHeight }}
       >
         <table className="w-full text-sm">
-          <thead className="sticky top-0 bg-slate-100 dark:bg-slate-800/95 backdrop-blur-sm">
-            <tr className="text-left text-xs text-slate-500 dark:text-slate-400">
+          <thead className="sticky top-0 app-surface-muted backdrop-blur-sm">
+            <tr className="text-left text-xs text-slate-500 dark:text-slate-300">
               <th 
                 className="px-4 py-2 font-medium cursor-pointer hover:text-slate-800 dark:hover:text-white transition-colors"
                 onClick={() => handleSort('name')}
@@ -240,6 +245,9 @@ const FileTable: React.FC<FileTableProps> = ({
                   Path <SortIcon field="path" />
                 </div>
               </th>
+              <th className="px-4 py-2 font-medium text-right w-20">
+                Delete
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -268,17 +276,29 @@ const FileTable: React.FC<FileTableProps> = ({
                     </span>
                   </div>
                 </td>
-                <td className="px-4 py-2 text-right tabular-nums text-slate-600 dark:text-slate-300">
+                <td className="px-4 py-2 text-right tabular-nums text-slate-600 dark:text-slate-200">
                   {FORMAT_SIZE(file.size)}
                 </td>
-                <td className="px-4 py-2 text-slate-500 dark:text-slate-400">
+                <td className="px-4 py-2 text-slate-500 dark:text-slate-300">
                   {file.kind === 'dir' ? 'Folder' : file.ext?.replace(/^\./, '').toUpperCase() || '-'}
                 </td>
                 <td 
-                  className="px-4 py-2 text-slate-400 dark:text-slate-500 truncate max-w-sm hidden lg:table-cell" 
+                  className="px-4 py-2 text-slate-400 dark:text-slate-300 truncate max-w-sm hidden lg:table-cell" 
                   title={file.path}
                 >
                   {file.path}
+                </td>
+                <td className="px-4 py-2 text-right">
+                  {file.kind === 'file' && (
+                    <SmartDeleteButton
+                      path={file.path}
+                      name={file.name}
+                      title={`Delete ${file.name}`}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-500 disabled:cursor-not-allowed disabled:text-slate-300"
+                      onDeleted={() => onDeleteComplete?.(file.path, file.name)}
+                      onError={(message) => onDeleteError?.(message)}
+                    />
+                  )}
                 </td>
               </tr>
             ))}

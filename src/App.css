@@ -14,16 +14,37 @@
   --color-panel-dark: #1E293B;
 }
 
+:root {
+  --app-bg: #f4f7fb;
+  --app-surface: #ffffff;
+  --app-surface-muted: rgba(255, 255, 255, 0.78);
+  --app-border: #d9e2ec;
+  --app-text-primary: #0f172a;
+  --app-text-secondary: #334155;
+  --app-text-muted: #64748b;
+}
+
+html.dark {
+  --app-bg: #0b1220;
+  --app-surface: #111c2d;
+  --app-surface-muted: rgba(17, 28, 45, 0.82);
+  --app-border: #223249;
+  --app-text-primary: #f8fafc;
+  --app-text-secondary: #d9e3ef;
+  --app-text-muted: #94a3b8;
+}
+
 /* Base styles */
 html {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--app-bg);
 }
 
 body {
-  background-color: var(--color-background-light);
-  color: #1e293b;
+  background-color: var(--app-bg);
+  color: var(--app-text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -31,29 +52,105 @@ html.dark,
 html.dark body,
 .dark body,
 body.dark {
-  background-color: #0F172A !important;
-  color: #fff;
+  background-color: var(--app-bg) !important;
+  color: var(--app-text-primary);
 }
 
 html.dark #root,
 .dark #root {
-  background-color: #0F172A !important;
+  background-color: var(--app-bg) !important;
 }
 
 /* Root app container */
 #root {
   min-height: 100vh;
-  background-color: inherit;
+  background-color: var(--app-bg);
+  color: var(--app-text-primary);
+}
+
+.app,
+.app-shell {
+  background-color: var(--app-bg);
+  color: var(--app-text-primary);
+}
+
+.app-surface {
+  background-color: var(--app-surface);
+  border-color: var(--app-border);
+}
+
+.app-surface-muted {
+  background-color: var(--app-surface-muted);
+  border-color: var(--app-border);
+}
+
+.app-text-primary {
+  color: var(--app-text-primary);
+}
+
+.app-text-secondary {
+  color: var(--app-text-secondary);
+}
+
+.app-text-muted {
+  color: var(--app-text-muted);
+}
+
+html.dark .app .text-slate-900,
+html.dark .app .text-slate-800,
+html.dark .app .text-slate-700,
+html.dark .app .text-slate-600 {
+  color: var(--app-text-primary) !important;
+}
+
+html.dark .app .text-slate-500,
+html.dark .app .text-slate-400,
+html.dark .app .text-slate-300 {
+  color: var(--app-text-secondary) !important;
+}
+
+html.dark .app .placeholder-slate-500::placeholder,
+html.dark .app .placeholder-slate-400::placeholder {
+  color: var(--app-text-muted) !important;
+}
+
+html.dark .app .border-slate-200,
+html.dark .app .border-slate-300,
+html.dark .app .border-slate-700,
+html.dark .app .border-slate-800 {
+  border-color: var(--app-border) !important;
+}
+
+html.dark .app .bg-white,
+html.dark .app .bg-slate-50,
+html.dark .app .bg-slate-100,
+html.dark .app .dark\:bg-slate-800,
+html.dark .app .dark\:bg-slate-900,
+html.dark .app .dark\:bg-panel-dark,
+html.dark .app .dark\:bg-panel-dark\/20,
+html.dark .app .dark\:bg-panel-dark\/30,
+html.dark .app .dark\:bg-black\/10,
+html.dark .app .dark\:bg-black\/20 {
+  background-color: var(--app-surface) !important;
+}
+
+html.dark .app .dark\:bg-slate-800\/50,
+html.dark .app .dark\:bg-slate-800\/95,
+html.dark .app .dark\:bg-slate-900\/50,
+html.dark .app .dark\:bg-slate-700,
+html.dark .app .dark\:bg-slate-700\/50,
+html.dark .app .glass {
+  background-color: var(--app-surface-muted) !important;
+}
+
+html.dark .app-logo {
+  filter: brightness(1.2) contrast(1.08);
 }
 
 /* Glass effect */
 .glass {
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--app-surface-muted);
   backdrop-filter: blur(20px) saturate(180%);
-}
-
-.dark .glass {
-  background: rgba(10, 15, 20, 0.85);
 }
 
 /* Custom scrollbar */

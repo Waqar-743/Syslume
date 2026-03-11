@@ -55,7 +55,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
         setFileInfo({
           path: node.path,
           name: node.name,
-          size: node.size_bytes,
+          size_bytes: node.size_bytes,
           safety_level: 'ConfirmRequired',
           is_dir: node.kind === 'dir',
           modified_days_ago: null,
@@ -175,6 +175,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
       },
       danger: true,
       secondary: true,
+      disabled: loading || fileInfo?.safety_level === 'Protected',
     },
     {
       icon: 'delete_forever',
@@ -187,6 +188,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
       },
       danger: true,
       secondary: true,
+      disabled: loading || fileInfo?.safety_level === 'Protected',
     },
   ];
 

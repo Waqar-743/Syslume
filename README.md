@@ -33,14 +33,6 @@ Get the latest installer for your operating system:
 
 ---
 
-## Overview
-
-DiskSight provides comprehensive visibility into storage consumption patterns across your file system. Unlike conventional disk analyzers, DiskSight employs a multi-threaded scanning engine written in Rust, delivering analysis speeds up to 10x faster than traditional tools while maintaining a minimal memory footprint.
-
-The application features three distinct visualization modes: an interactive treemap for spatial analysis, a hierarchical directory tree for structural navigation, and a tabular view for detailed file-level inspection. Real-time progress tracking and intelligent caching ensure a responsive user experience even when analyzing drives with millions of files.
-
----
-
 ## Key Features
 
 ### High-Performance Scanning Engine

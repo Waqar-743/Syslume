@@ -17,11 +17,11 @@
 :root {
   --app-bg: #f4f7fb;
   --app-surface: #ffffff;
-  --app-surface-muted: rgba(255, 255, 255, 0.78);
-  --app-border: #d9e2ec;
+  --app-surface-muted: rgba(255, 255, 255, 0.92);
+  --app-border: #cbd5e1;
   --app-text-primary: #0f172a;
-  --app-text-secondary: #334155;
-  --app-text-muted: #64748b;
+  --app-text-secondary: #1e293b;
+  --app-text-muted: #475569;
 }
 
 html.dark {
@@ -94,6 +94,21 @@ html.dark #root,
 
 .app-text-muted {
   color: var(--app-text-muted);
+}
+
+html:not(.dark) .app .text-slate-600,
+html:not(.dark) .app .text-slate-500 {
+  color: var(--app-text-secondary) !important;
+}
+
+html:not(.dark) .app .text-slate-400,
+html:not(.dark) .app .text-slate-300 {
+  color: var(--app-text-muted) !important;
+}
+
+html:not(.dark) .app .placeholder-slate-500::placeholder,
+html:not(.dark) .app .placeholder-slate-400::placeholder {
+  color: var(--app-text-muted) !important;
 }
 
 html.dark .app .text-slate-900,

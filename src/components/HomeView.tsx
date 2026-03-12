@@ -33,30 +33,30 @@ const HomeView: React.FC<HomeViewProps> = ({ onSelectDrive, drives, isLoading })
         <button 
           onClick={() => handleStartScan()}
           disabled={isLoading || drives.length === 0}
-          className="group relative overflow-hidden bg-primary text-white p-8 rounded-[2rem] shadow-2xl shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95 text-left flex flex-col justify-between h-64 border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="group relative overflow-hidden bg-primary text-slate-950 dark:text-white p-8 rounded-[2rem] shadow-2xl shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95 text-left flex flex-col justify-between h-64 border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <div className="absolute -top-6 -right-6 p-12 opacity-10 transition-transform group-hover:scale-125 group-hover:rotate-12">
+          <div className="absolute -top-6 -right-6 p-12 opacity-15 dark:opacity-10 transition-transform group-hover:scale-125 group-hover:rotate-12">
             <span className="material-symbols-outlined text-[8rem]">analytics</span>
           </div>
-          <span className="material-symbols-outlined text-3xl mb-6 bg-white/20 p-3 rounded-2xl backdrop-blur-md w-fit shadow-lg">speed</span>
+          <span className="material-symbols-outlined text-3xl mb-6 bg-black/10 dark:bg-white/20 p-3 rounded-2xl backdrop-blur-md w-fit shadow-lg text-slate-950 dark:text-white">speed</span>
           <div>
             <h3 className="text-xl font-black mb-3">Scan Drive</h3>
-            <p className="text-white/75 text-sm font-medium leading-relaxed">Map the largest folders and files fast.</p>
+            <p className="text-slate-900/80 dark:text-white/75 text-sm font-medium leading-relaxed">Map the largest folders and files fast.</p>
           </div>
         </button>
 
         <button 
           onClick={() => handleStartScan()}
           disabled={isLoading || drives.length === 0}
-          className="group relative overflow-hidden bg-secondary text-white p-8 rounded-[2rem] shadow-2xl shadow-secondary/30 transition-all hover:scale-[1.02] active:scale-95 text-left flex flex-col justify-between h-64 border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="group relative overflow-hidden bg-secondary text-slate-950 dark:text-white p-8 rounded-[2rem] shadow-2xl shadow-secondary/30 transition-all hover:scale-[1.02] active:scale-95 text-left flex flex-col justify-between h-64 border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <div className="absolute -top-6 -right-6 p-12 opacity-10 transition-transform group-hover:scale-125">
+          <div className="absolute -top-6 -right-6 p-12 opacity-15 dark:opacity-10 transition-transform group-hover:scale-125">
             <span className="material-symbols-outlined text-[8rem]">auto_delete</span>
           </div>
-          <span className="material-symbols-outlined text-3xl mb-6 bg-white/20 p-3 rounded-2xl backdrop-blur-md w-fit shadow-lg">cleaning_services</span>
+          <span className="material-symbols-outlined text-3xl mb-6 bg-black/10 dark:bg-white/20 p-3 rounded-2xl backdrop-blur-md w-fit shadow-lg text-slate-950 dark:text-white">cleaning_services</span>
           <div>
             <h3 className="text-xl font-black mb-3">Safe Cleanup</h3>
-            <p className="text-white/75 text-sm font-medium leading-relaxed">Delete temporary files while protected system paths stay blocked.</p>
+            <p className="text-slate-900/80 dark:text-white/75 text-sm font-medium leading-relaxed">Delete temporary files while protected system paths stay blocked.</p>
           </div>
         </button>
 

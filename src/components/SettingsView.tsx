@@ -8,6 +8,12 @@ interface SettingsViewProps {
 }
 
 const SettingsView: React.FC<SettingsViewProps> = ({ settings, onUpdateSettings, onClose }) => {
+  const themeOptions = [
+    { key: 'system', icon: 'settings_suggest', label: 'system' },
+    { key: 'light', icon: 'light_mode', label: 'light' },
+    { key: 'dark', icon: 'dark_mode', label: 'dark' },
+  ] as const;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="app-surface w-full max-w-lg rounded-3xl shadow-2xl border overflow-hidden animate-slideIn">
@@ -24,18 +30,22 @@ const SettingsView: React.FC<SettingsViewProps> = ({ settings, onUpdateSettings,
               Interface Theme
             </h3>
             <div className="grid grid-cols-3 gap-4">
-              {(['system', 'light', 'dark'] as const).map((t) => (
+              {themeOptions.map((option) => {
+                const isSelected = settings.theme === option.key;
+
+                return (
                 <button
-                  key={t}
-                  onClick={() => onUpdateSettings({ theme: t })}
-                  className={`app-surface p-4 rounded-2xl border-2 transition-all ${settings.theme === t ? 'border-secondary bg-secondary/5' : 'border-slate-200 dark:border-slate-800 hover:border-secondary/50'}`}
+                  key={option.key}
+                  onClick={() => onUpdateSettings({ theme: option.key })}
+                  className={`app-surface p-4 rounded-2xl border-2 transition-all ${isSelected ? 'border-secondary bg-secondary/5 dark:bg-secondary/10 shadow-lg shadow-secondary/10' : 'border-slate-200 dark:border-slate-700 hover:border-secondary/50 hover:bg-slate-50 dark:hover:bg-slate-800/60'}`}
                 >
-                  <span className={`material-symbols-outlined text-2xl block mx-auto mb-2 ${settings.theme === t ? 'text-secondary' : 'text-slate-400'}`}>
-                    {t === 'system' ? 'settings_suggest' : t === 'light' ? 'light_mode' : 'dark_mode'}
+                  <span className={`material-symbols-outlined text-2xl block mx-auto mb-2 ${isSelected ? 'text-secondary' : 'text-slate-600 dark:text-slate-200'}`}>
+                    {option.icon}
                   </span>
-                  <span className={`text-xs font-bold capitalize ${settings.theme === t ? 'text-secondary' : 'text-slate-500'}`}>{t}</span>
+                  <span className={`text-xs font-bold capitalize ${isSelected ? 'text-secondary' : 'text-slate-700 dark:text-slate-200'}`}>{option.label}</span>
                 </button>
-              ))}
+                );
+              })}
             </div>
           </section>
 

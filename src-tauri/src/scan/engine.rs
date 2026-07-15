@@ -8,8 +8,7 @@ use ignore::WalkBuilder;
 use tauri::AppHandle;
 
 use crate::scan::events::{
-    emit_error, emit_partial_tree, emit_progress, ErrorPayload, PartialTreePayload,
-    ProgressPayload,
+    emit_error, emit_partial_tree, emit_progress, ErrorPayload, PartialTreePayload, ProgressPayload,
 };
 use crate::scan::model::{
     ExtensionStat, NodeId, NodeKind, ScanOptions, ScanResult, TreeNode, TreeNodeDelta,
@@ -30,7 +29,7 @@ const SKIP_DIRS: &[&str] = &[
     "$WinREAgent",
     "Windows.old",
     "PerfLogs",
-    "MSOCache", 
+    "MSOCache",
     "Config.Msi",
     "Windows",
     "WinSxS",
@@ -118,6 +117,10 @@ pub fn run_scan(
             size_bytes: 0,
             file_ext: None,
             children: Vec::new(),
+            modified_unix: None,
+            created_unix: None,
+            readonly: false,
+            is_symlink: false,
         },
     );
     path_map.insert(root_path_str.clone(), root_id);
@@ -140,26 +143,40 @@ pub fn run_scan(
     builder.max_depth(options.max_depth.map(|d| d as usize));
     // Performance optimizations
     builder.skip_stdout(true); // Skip stdout for better performance
-    builder.hidden(false); // Include hidden files for complete scan
+    builder.hidden(!options.include_hidden);
     builder.git_ignore(false); // Don't use gitignore rules
     builder.git_global(false);
     builder.git_exclude(false);
     builder.ignore(false); // Don't use .ignore files
     builder.standard_filters(false); // Disable all standard filters for speed
-    
-    // Filter to skip system directories
-    builder.filter_entry(|entry| {
+
+    let include_system_dirs = options.include_system_dirs;
+    let exclude_patterns: Vec<String> = options
+        .exclude_patterns
+        .iter()
+        .map(|pattern| pattern.trim_matches('*').to_lowercase())
+        .filter(|pattern| !pattern.is_empty())
+        .collect();
+
+    // Apply the selected system-directory and custom exclusions.
+    builder.filter_entry(move |entry| {
+        let normalized = entry.path().to_string_lossy().to_lowercase();
+        if exclude_patterns
+            .iter()
+            .any(|pattern| normalized.contains(pattern))
+        {
+            return false;
+        }
         if entry.file_type().map(|t| t.is_dir()).unwrap_or(false) {
             if let Some(name) = entry.file_name().to_str() {
-                // Skip system directories
-                if should_skip_dir(name) {
+                if !include_system_dirs && should_skip_dir(name) {
                     return false;
                 }
             }
         }
         true
     });
-    
+
     let mut walker = builder.build();
 
     while let Some(entry) = walker.next() {
@@ -174,8 +191,14 @@ pub fn run_scan(
 
                 let is_dir = entry.file_type().map(|t| t.is_dir()).unwrap_or(false);
                 if is_dir {
-                    let dir_id = ensure_dir_node(&mut nodes, &mut path_map, &mut changed_nodes, path, &node_counter);
-                    
+                    let dir_id = ensure_dir_node(
+                        &mut nodes,
+                        &mut path_map,
+                        &mut changed_nodes,
+                        path,
+                        &node_counter,
+                    );
+
                     if path != root.as_path() {
                         total_dirs += 1;
                     }
@@ -187,14 +210,9 @@ pub fn run_scan(
                     }
                 } else {
                     // For files, use metadata from entry if available (faster)
-                    let size = entry.metadata()
-                        .map(|m| m.len())
-                        .unwrap_or(0); // Skip error logging for speed
-                    
-                    if size == 0 {
-                        continue; // Skip empty or unreadable files
-                    }
-                    
+                    let metadata = entry.metadata().ok();
+                    let size = metadata.as_ref().map(|m| m.len()).unwrap_or(0);
+
                     visited_bytes_approx = visited_bytes_approx.saturating_add(size);
 
                     let parent_id = parent_id_for_path(&path_map, path);
@@ -206,6 +224,11 @@ pub fn run_scan(
                         parent_id,
                         &node_counter,
                         size,
+                        metadata.as_ref(),
+                        entry
+                            .file_type()
+                            .map(|kind| kind.is_symlink())
+                            .unwrap_or(false),
                     );
                     total_files += 1;
 
@@ -217,13 +240,11 @@ pub fn run_scan(
                     }
 
                     if let Some(ext) = extract_extension(path) {
-                        let entry = extension_stats
-                            .entry(ext.clone())
-                            .or_insert(ExtensionStat {
-                                ext,
-                                bytes: 0,
-                                count: 0,
-                            });
+                        let entry = extension_stats.entry(ext.clone()).or_insert(ExtensionStat {
+                            ext,
+                            bytes: 0,
+                            count: 0,
+                        });
                         entry.bytes = entry.bytes.saturating_add(size);
                         entry.count = entry.count.saturating_add(1);
                     } else {
@@ -339,6 +360,10 @@ fn ensure_dir_node(
             size_bytes: 0,
             file_ext: None,
             children: Vec::new(),
+            modified_unix: None,
+            created_unix: None,
+            readonly: false,
+            is_symlink: false,
         },
     );
     path_map.insert(path_str, id);
@@ -354,6 +379,8 @@ fn ensure_file_node(
     parent_id: Option<NodeId>,
     counter: &AtomicU64,
     size: u64,
+    metadata: Option<&std::fs::Metadata>,
+    is_symlink: bool,
 ) -> NodeId {
     let path_str = path.to_string_lossy().to_string();
     if let Some(id) = path_map.get(&path_str).copied() {
@@ -381,6 +408,12 @@ fn ensure_file_node(
             size_bytes: size,
             file_ext: ext,
             children: Vec::new(),
+            modified_unix: metadata.and_then(|value| system_time_to_unix(value.modified().ok())),
+            created_unix: metadata.and_then(|value| system_time_to_unix(value.created().ok())),
+            readonly: metadata
+                .map(|value| value.permissions().readonly())
+                .unwrap_or(false),
+            is_symlink,
         },
     );
     path_map.insert(path_str, id);
@@ -417,6 +450,13 @@ fn extract_extension(path: &Path) -> Option<String> {
         .map(|s| s.to_lowercase())
 }
 
+fn system_time_to_unix(value: Option<SystemTime>) -> Option<u64> {
+    value?
+        .duration_since(UNIX_EPOCH)
+        .ok()
+        .map(|duration| duration.as_secs())
+}
+
 fn recompute_dir_sizes(nodes: &mut HashMap<NodeId, TreeNode>) {
     let mut order: Vec<(usize, NodeId)> = Vec::with_capacity(nodes.len());
     for (id, node) in nodes.iter() {
@@ -434,7 +474,10 @@ fn recompute_dir_sizes(nodes: &mut HashMap<NodeId, TreeNode>) {
         let kind = nodes.get(&id).map(|n| n.kind).unwrap_or(NodeKind::File);
         if kind == NodeKind::Dir {
             let mut sum = 0u64;
-            let children = nodes.get(&id).map(|n| n.children.clone()).unwrap_or_default();
+            let children = nodes
+                .get(&id)
+                .map(|n| n.children.clone())
+                .unwrap_or_default();
             for child_id in children {
                 if let Some(child) = nodes.get(&child_id) {
                     sum = sum.saturating_add(child.size_bytes);
@@ -533,6 +576,10 @@ fn node_to_delta(node: &TreeNode) -> TreeNodeDelta {
         kind: node.kind,
         size_bytes: node.size_bytes,
         file_ext: node.file_ext.clone(),
+        modified_unix: node.modified_unix,
+        created_unix: node.created_unix,
+        readonly: node.readonly,
+        is_symlink: node.is_symlink,
     }
 }
 

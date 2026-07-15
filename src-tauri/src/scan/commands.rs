@@ -1,11 +1,20 @@
+use std::collections::HashMap;
+use std::fs::{self, File};
+use std::io::{BufReader, Read};
+use std::path::{Path, PathBuf};
 use std::thread;
 use std::time::{SystemTime, UNIX_EPOCH};
-use std::path::Path;
-use std::fs;
 
+use ignore::WalkBuilder;
+use serde::Serialize;
+use sha2::{Digest, Sha256};
 use tauri::{AppHandle, State};
 use uuid::Uuid;
 
+use crate::scan::delete::{
+    emit_delete_failed, emit_deleted, get_file_info, get_safety_level, smart_delete_file,
+    DeleteFailedPayload, DeleteResult, DeletedPayload, FileInfo, SafetyLevel,
+};
 use crate::scan::engine::{run_scan, ScanError};
 use crate::scan::events::{
     emit_canceled, emit_error, emit_finished, emit_started, CanceledPayload, ErrorPayload,
@@ -13,11 +22,6 @@ use crate::scan::events::{
 };
 use crate::scan::model::{RootEntry, ScanHandle, ScanOptions, ScanSummary};
 use crate::scan::state::{AppState, ScanState};
-use crate::scan::delete::{
-    SafetyLevel, DeleteResult, FileInfo, 
-    get_safety_level, get_file_info, smart_delete_file,
-    emit_deleted, emit_delete_failed, DeletedPayload, DeleteFailedPayload,
-};
 
 #[tauri::command]
 pub fn start_scan(
@@ -85,7 +89,12 @@ pub fn start_scan(
                 state_clone.finish_scan(&result_scan_id, result);
             }
             Err(ScanError::Canceled) => {
-                emit_canceled(&app_handle_clone, CanceledPayload { scan_id: scan_id_for_closure.clone() });
+                emit_canceled(
+                    &app_handle_clone,
+                    CanceledPayload {
+                        scan_id: scan_id_for_closure.clone(),
+                    },
+                );
                 state_clone.remove_scan(&scan_id_for_closure);
             }
             Err(ScanError::Failed(message)) => {
@@ -111,7 +120,10 @@ pub fn cancel_scan(scan_id: String, state: State<'_, AppState>) -> bool {
 }
 
 #[tauri::command]
-pub fn get_scan_result(scan_id: String, state: State<'_, AppState>) -> Option<crate::scan::model::ScanResult> {
+pub fn get_scan_result(
+    scan_id: String,
+    state: State<'_, AppState>,
+) -> Option<crate::scan::model::ScanResult> {
     state.get_result(&scan_id)
 }
 
@@ -141,11 +153,11 @@ fn now_millis() -> u64 {
 #[tauri::command]
 pub fn open_in_explorer(path: String) -> Result<(), String> {
     let path = Path::new(&path);
-    
+
     if !path.exists() {
         return Err(format!("Path does not exist: {}", path.display()));
     }
-    
+
     #[cfg(target_os = "windows")]
     {
         use std::process::Command;
@@ -161,7 +173,7 @@ pub fn open_in_explorer(path: String) -> Result<(), String> {
                 .map_err(|e| e.to_string())?;
         }
     }
-    
+
     #[cfg(target_os = "macos")]
     {
         use std::process::Command;
@@ -177,7 +189,7 @@ pub fn open_in_explorer(path: String) -> Result<(), String> {
                 .map_err(|e| e.to_string())?;
         }
     }
-    
+
     #[cfg(target_os = "linux")]
     {
         use std::process::Command;
@@ -187,7 +199,7 @@ pub fn open_in_explorer(path: String) -> Result<(), String> {
             .spawn()
             .map_err(|e| e.to_string())?;
     }
-    
+
     Ok(())
 }
 
@@ -195,11 +207,15 @@ pub fn open_in_explorer(path: String) -> Result<(), String> {
 #[tauri::command]
 pub fn delete_path(path: String, to_trash: bool) -> Result<(), String> {
     let path = Path::new(&path);
-    
+
     if !path.exists() {
         return Err(format!("Path does not exist: {}", path.display()));
     }
-    
+
+    if get_safety_level(path) == SafetyLevel::Protected {
+        return Err("Cannot delete a protected system path".to_string());
+    }
+
     if to_trash {
         // Move to trash/recycle bin
         trash::delete(path).map_err(|e| e.to_string())?;
@@ -211,7 +227,7 @@ pub fn delete_path(path: String, to_trash: bool) -> Result<(), String> {
             fs::remove_file(path).map_err(|e| e.to_string())?;
         }
     }
-    
+
     Ok(())
 }
 
@@ -219,17 +235,15 @@ pub fn delete_path(path: String, to_trash: bool) -> Result<(), String> {
 #[tauri::command]
 pub fn get_path_size(path: String) -> Result<u64, String> {
     let path = Path::new(&path);
-    
+
     if !path.exists() {
         return Err(format!("Path does not exist: {}", path.display()));
     }
-    
+
     if path.is_file() {
-        return path.metadata()
-            .map(|m| m.len())
-            .map_err(|e| e.to_string());
+        return path.metadata().map(|m| m.len()).map_err(|e| e.to_string());
     }
-    
+
     // For directories, calculate recursively
     fn dir_size(path: &Path) -> Result<u64, std::io::Error> {
         let mut size = 0;
@@ -246,7 +260,7 @@ pub fn get_path_size(path: String) -> Result<u64, String> {
         }
         Ok(size)
     }
-    
+
     dir_size(path).map_err(|e| e.to_string())
 }
 
@@ -274,53 +288,69 @@ pub fn get_file_details(path: String) -> Result<FileInfo, String> {
 /// Smart delete a file or folder
 /// If force=true, skip confirmation requirement (user already confirmed)
 #[tauri::command]
-pub fn smart_delete(path: String, force: bool, app_handle: AppHandle) -> Result<DeleteResult, String> {
+pub fn smart_delete(
+    path: String,
+    force: bool,
+    app_handle: AppHandle,
+) -> Result<DeleteResult, String> {
     let path_obj = Path::new(&path);
-    
+
     if !path_obj.exists() {
         return Err(format!("Path does not exist: {}", path));
     }
-    
+
     let safety = get_safety_level(path_obj);
-    
+
     // Never allow deleting protected files
     if safety == SafetyLevel::Protected {
-        emit_delete_failed(&app_handle, DeleteFailedPayload {
-            path: path.clone(),
-            reason: "Protected system file cannot be deleted".to_string(),
-        });
+        emit_delete_failed(
+            &app_handle,
+            DeleteFailedPayload {
+                path: path.clone(),
+                reason: "Protected system file cannot be deleted".to_string(),
+            },
+        );
         return Err("Cannot delete protected system file".to_string());
     }
-    
+
     // If confirmation required but not forced, return error
     if safety == SafetyLevel::ConfirmRequired && !force {
         return Err("Confirmation required for this file type".to_string());
     }
-    
+
     // Perform the delete
     match smart_delete_file(path_obj, force) {
         Ok(result) => {
             if result.success {
-                emit_deleted(&app_handle, DeletedPayload {
-                    path: path.clone(),
-                    bytes_freed: result.bytes_freed,
-                    was_auto: result.was_auto_delete,
-                });
+                emit_deleted(
+                    &app_handle,
+                    DeletedPayload {
+                        path: path.clone(),
+                        bytes_freed: result.bytes_freed,
+                        was_auto: result.was_auto_delete,
+                    },
+                );
             } else {
                 for error in &result.errors {
-                    emit_delete_failed(&app_handle, DeleteFailedPayload {
-                        path: path.clone(),
-                        reason: error.clone(),
-                    });
+                    emit_delete_failed(
+                        &app_handle,
+                        DeleteFailedPayload {
+                            path: path.clone(),
+                            reason: error.clone(),
+                        },
+                    );
                 }
             }
             Ok(result)
         }
         Err(e) => {
-            emit_delete_failed(&app_handle, DeleteFailedPayload {
-                path: path.clone(),
-                reason: e.clone(),
-            });
+            emit_delete_failed(
+                &app_handle,
+                DeleteFailedPayload {
+                    path: path.clone(),
+                    reason: e.clone(),
+                },
+            );
             Err(e)
         }
     }
@@ -334,61 +364,70 @@ pub fn bulk_smart_delete(paths: Vec<String>, force: bool, app_handle: AppHandle)
     let mut total_folders = 0u64;
     let mut errors = Vec::new();
     let mut all_auto = true;
-    
+
     for path_str in paths {
         let path = Path::new(&path_str);
-        
+
         if !path.exists() {
             errors.push(format!("Path does not exist: {}", path_str));
             continue;
         }
-        
+
         let safety = get_safety_level(path);
-        
+
         if safety == SafetyLevel::Protected {
             errors.push(format!("Skipped protected: {}", path_str));
-            emit_delete_failed(&app_handle, DeleteFailedPayload {
-                path: path_str.clone(),
-                reason: "Protected system file".to_string(),
-            });
+            emit_delete_failed(
+                &app_handle,
+                DeleteFailedPayload {
+                    path: path_str.clone(),
+                    reason: "Protected system file".to_string(),
+                },
+            );
             continue;
         }
-        
+
         if safety == SafetyLevel::ConfirmRequired && !force {
             errors.push(format!("Requires confirmation: {}", path_str));
             all_auto = false;
             continue;
         }
-        
+
         if safety == SafetyLevel::ConfirmRequired {
             all_auto = false;
         }
-        
+
         match smart_delete_file(path, force) {
             Ok(result) => {
                 total_bytes += result.bytes_freed;
                 total_files += result.files_deleted;
                 total_folders += result.folders_deleted;
                 errors.extend(result.errors);
-                
+
                 if result.success {
-                    emit_deleted(&app_handle, DeletedPayload {
-                        path: path_str,
-                        bytes_freed: result.bytes_freed,
-                        was_auto: result.was_auto_delete,
-                    });
+                    emit_deleted(
+                        &app_handle,
+                        DeletedPayload {
+                            path: path_str,
+                            bytes_freed: result.bytes_freed,
+                            was_auto: result.was_auto_delete,
+                        },
+                    );
                 }
             }
             Err(e) => {
                 errors.push(e.clone());
-                emit_delete_failed(&app_handle, DeleteFailedPayload {
-                    path: path_str,
-                    reason: e,
-                });
+                emit_delete_failed(
+                    &app_handle,
+                    DeleteFailedPayload {
+                        path: path_str,
+                        reason: e,
+                    },
+                );
             }
         }
     }
-    
+
     DeleteResult {
         success: errors.is_empty(),
         bytes_freed: total_bytes,
@@ -397,4 +436,90 @@ pub fn bulk_smart_delete(paths: Vec<String>, force: bool, app_handle: AppHandle)
         errors,
         was_auto_delete: all_auto,
     }
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct DuplicateFile {
+    pub path: String,
+    pub size_bytes: u64,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct DuplicateGroup {
+    pub hash: String,
+    pub size_bytes: u64,
+    pub reclaimable_bytes: u64,
+    pub files: Vec<DuplicateFile>,
+}
+
+/// Find byte-identical files by grouping on size before computing SHA-256.
+#[tauri::command]
+pub fn find_duplicates(
+    root_path: String,
+    min_size_bytes: u64,
+) -> Result<Vec<DuplicateGroup>, String> {
+    let root = crate::scan::engine::normalize_root(&root_path)?;
+    let mut by_size: HashMap<u64, Vec<PathBuf>> = HashMap::new();
+    let minimum = min_size_bytes.max(1);
+
+    for entry in WalkBuilder::new(root).follow_links(false).build().flatten() {
+        if !entry
+            .file_type()
+            .map(|kind| kind.is_file())
+            .unwrap_or(false)
+        {
+            continue;
+        }
+        if let Ok(metadata) = entry.metadata() {
+            if metadata.len() >= minimum {
+                by_size
+                    .entry(metadata.len())
+                    .or_default()
+                    .push(entry.into_path());
+            }
+        }
+    }
+
+    let mut groups = Vec::new();
+    for (size_bytes, paths) in by_size.into_iter().filter(|(_, paths)| paths.len() > 1) {
+        let mut by_hash: HashMap<String, Vec<PathBuf>> = HashMap::new();
+        for path in paths {
+            if let Ok(hash) = hash_file(&path) {
+                by_hash.entry(hash).or_default().push(path);
+            }
+        }
+        for (hash, matches) in by_hash.into_iter().filter(|(_, matches)| matches.len() > 1) {
+            groups.push(DuplicateGroup {
+                hash,
+                size_bytes,
+                reclaimable_bytes: size_bytes.saturating_mul((matches.len() - 1) as u64),
+                files: matches
+                    .into_iter()
+                    .map(|path| DuplicateFile {
+                        path: path.to_string_lossy().to_string(),
+                        size_bytes,
+                    })
+                    .collect(),
+            });
+        }
+    }
+    groups.sort_by(|left, right| right.reclaimable_bytes.cmp(&left.reclaimable_bytes));
+    Ok(groups)
+}
+
+fn hash_file(path: &Path) -> Result<String, String> {
+    let file = File::open(path).map_err(|error| error.to_string())?;
+    let mut reader = BufReader::with_capacity(1024 * 1024, file);
+    let mut hasher = Sha256::new();
+    let mut buffer = [0_u8; 1024 * 1024];
+    loop {
+        let read = reader
+            .read(&mut buffer)
+            .map_err(|error| error.to_string())?;
+        if read == 0 {
+            break;
+        }
+        hasher.update(&buffer[..read]);
+    }
+    Ok(format!("{:x}", hasher.finalize()))
 }

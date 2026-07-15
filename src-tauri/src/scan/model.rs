@@ -12,6 +12,10 @@ pub struct ScanOptions {
     pub max_depth: Option<u32>,
     #[serde(default)]
     pub exclude_patterns: Vec<String>,
+    #[serde(default)]
+    pub include_hidden: bool,
+    #[serde(default)]
+    pub include_system_dirs: bool,
 }
 
 impl Default for ScanOptions {
@@ -21,6 +25,8 @@ impl Default for ScanOptions {
             one_file_system: false,
             max_depth: None,
             exclude_patterns: Vec::new(),
+            include_hidden: false,
+            include_system_dirs: false,
         }
     }
 }
@@ -42,6 +48,10 @@ pub struct TreeNode {
     pub size_bytes: u64,
     pub file_ext: Option<String>,
     pub children: Vec<NodeId>,
+    pub modified_unix: Option<u64>,
+    pub created_unix: Option<u64>,
+    pub readonly: bool,
+    pub is_symlink: bool,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -53,6 +63,10 @@ pub struct TreeNodeDelta {
     pub kind: NodeKind,
     pub size_bytes: u64,
     pub file_ext: Option<String>,
+    pub modified_unix: Option<u64>,
+    pub created_unix: Option<u64>,
+    pub readonly: bool,
+    pub is_symlink: bool,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

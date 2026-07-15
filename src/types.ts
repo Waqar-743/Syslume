@@ -1,5 +1,3 @@
-// Type definitions matching the Rust backend
-
 export type NodeId = number;
 
 export interface ScanOptions {
@@ -7,20 +5,11 @@ export interface ScanOptions {
   one_file_system?: boolean;
   max_depth?: number | null;
   exclude_patterns?: string[];
+  include_hidden?: boolean;
+  include_system_dirs?: boolean;
 }
 
 export type NodeKind = "file" | "dir";
-
-export interface TreeNode {
-  id: NodeId;
-  parent: NodeId | null;
-  name: string;
-  path: string;
-  kind: NodeKind;
-  size_bytes: number;
-  file_ext: string | null;
-  children: NodeId[];
-}
 
 export interface TreeNodeDelta {
   id: NodeId;
@@ -30,21 +19,20 @@ export interface TreeNodeDelta {
   kind: NodeKind;
   size_bytes: number;
   file_ext: string | null;
+  modified_unix?: number | null;
+  created_unix?: number | null;
+  readonly?: boolean;
+  is_symlink?: boolean;
+}
+
+export interface TreeNode extends TreeNodeDelta {
+  children: NodeId[];
 }
 
 export interface ExtensionStat {
   ext: string;
   bytes: number;
   count: number;
-}
-
-export interface ScanResult {
-  scan_id: string;
-  root_id: NodeId;
-  total_bytes: number;
-  total_files: number;
-  total_dirs: number;
-  extension_stats: ExtensionStat[];
 }
 
 export interface ScanSummary {
@@ -54,22 +42,18 @@ export interface ScanSummary {
   extension_stats: ExtensionStat[];
 }
 
-export interface ScanHandle {
+export interface ScanResult extends ScanSummary {
   scan_id: string;
+  root_id: NodeId;
 }
+
+export interface ScanHandle { scan_id: string; }
 
 export interface RootEntry {
   name: string;
   path: string;
   total_bytes: number;
   available_bytes: number;
-}
-
-// Event payloads
-export interface StartedPayload {
-  scan_id: string;
-  root_path: string;
-  started_at: number;
 }
 
 export interface ProgressPayload {
@@ -80,12 +64,6 @@ export interface ProgressPayload {
   phase: string;
 }
 
-export interface PartialTreePayload {
-  scan_id: string;
-  nodes: TreeNodeDelta[];
-  updated_at: number;
-}
-
 export interface FinishedPayload {
   scan_id: string;
   summary: ScanSummary;
@@ -93,61 +71,44 @@ export interface FinishedPayload {
   finished_at: number;
 }
 
-export interface ErrorPayload {
+export interface TreeNodeDeltaPayload {
   scan_id: string;
-  message: string;
-  path: string | null;
+  nodes: TreeNodeDelta[];
+  updated_at: number;
 }
 
-export interface CanceledPayload {
-  scan_id: string;
-}
-
-// App-specific types
-export type AppView = 'HOME' | 'SCANNING' | 'DASHBOARD' | 'SETTINGS' | 'FILTERED';
-
-export interface AppSettings {
-  theme: 'dark' | 'light' | 'system';
-  showEmptyFolders: boolean;
-  followSymbolicLinks: boolean;
-  highPrecisionSizes: boolean;
-  scanThreads: number;
-  maxDepth: number;
-  includeHidden: boolean;
-  includeSystemDirs: boolean;
-}
-
-export interface ScanProgressPayload {
-  scan_id?: string;
-  visited_entries: number;
-  visited_bytes_approx: number;
-  current_path: string;
-  phase: string;
+export interface ScanProgressPayload extends ProgressPayload {
   elapsed_ms?: number;
 }
 
-export interface RecentScan {
-  id: string;
-  path: string;
-  size: string;
-  time: string;
-  icon: string;
+export type AppView = "HOME" | "SCANNING" | "DASHBOARD";
+
+export interface AppSettings {
+  theme: "dark" | "light" | "system";
+  maxDepth: number;
+  includeHidden: boolean;
+  includeSystemDirs: boolean;
+  followSymbolicLinks: boolean;
+  oneFileSystem: boolean;
+  excludePatterns: string[];
+  duplicateMinSizeMb: number;
+  oldFileDays: number;
 }
 
-export interface TopFile {
+export interface ScanHistoryEntry {
   id: string;
+  path: string;
   name: string;
-  size: string;
-  path: string;
-  date: string;
-  icon: string;
+  scannedAt: number;
+  durationMs: number;
+  summary: ScanSummary;
 }
 
-// ==========================================
-// SMART DELETE TYPES
-// ==========================================
-
-export type SafetyLevel = 'AutoDelete' | 'ConfirmRequired' | 'Protected';
+// Rust serializes the canonical values in snake_case. PascalCase variants are
+// retained temporarily so legacy components remain source-compatible.
+export type SafetyLevel =
+  | "auto_delete" | "confirm_required" | "protected"
+  | "AutoDelete" | "ConfirmRequired" | "Protected";
 
 export interface DeleteResult {
   success: boolean;
@@ -169,14 +130,16 @@ export interface FileInfo {
   size?: number;
 }
 
-export interface DeletedPayload {
-  path: string;
-  bytes_freed: number;
-  was_auto: boolean;
+export interface DuplicateFile { path: string; size_bytes: number; }
+
+export interface DuplicateGroup {
+  hash: string;
+  size_bytes: number;
+  reclaimable_bytes: number;
+  files: DuplicateFile[];
 }
 
-export interface DeleteFailedPayload {
-  path: string;
-  reason: string;
-}
-
+export interface RecentScan { id: string; path: string; size: string; time: string; icon: string; }
+export interface TopFile { id: string; name: string; size: string; path: string; date: string; icon: string; }
+export interface DeletedPayload { path: string; bytes_freed: number; was_auto: boolean; }
+export interface DeleteFailedPayload { path: string; reason: string; }

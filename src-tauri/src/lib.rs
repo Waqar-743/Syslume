@@ -6,6 +6,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .manage(app_state)
         .invoke_handler(tauri::generate_handler![
             scan::commands::start_scan,
@@ -18,7 +19,8 @@ pub fn run() {
             scan::commands::get_file_safety_level,
             scan::commands::get_file_details,
             scan::commands::smart_delete,
-            scan::commands::bulk_smart_delete
+            scan::commands::bulk_smart_delete,
+            scan::commands::find_duplicates
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

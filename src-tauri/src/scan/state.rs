@@ -34,7 +34,9 @@ impl AppState {
     pub fn cancel_scan(&self, scan_id: &str) -> bool {
         if let Ok(guard) = self.active_scans.lock() {
             if let Some(state) = guard.get(scan_id) {
-                state.cancel_flag.store(true, std::sync::atomic::Ordering::Relaxed);
+                state
+                    .cancel_flag
+                    .store(true, std::sync::atomic::Ordering::Relaxed);
                 return true;
             }
         }

@@ -11,9 +11,9 @@ use tauri::{AppHandle, Emitter};
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum SafetyLevel {
-    AutoDelete,       // No warning - safe to delete
-    ConfirmRequired,  // Show warning dialog
-    Protected,        // Never delete (system files)
+    AutoDelete,      // No warning - safe to delete
+    ConfirmRequired, // Show warning dialog
+    Protected,       // Never delete (system files)
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -38,23 +38,42 @@ pub struct FileInfo {
 // Auto-delete extensions (safe to delete without confirmation)
 const AUTO_DELETE_EXTENSIONS: &[&str] = &[
     // Temp files
-    "tmp", "temp", "bak", "old", "swp", "swo",
+    "tmp",
+    "temp",
+    "bak",
+    "old",
+    "swp",
+    "swo",
     // Logs
-    "log", "logs",
+    "log",
+    "logs",
     // Cache
     "cache",
     // Windows junk
-    "thumbs.db", "desktop.ini", "ehthumbs.db", "ehthumbs_vista.db",
+    "thumbs.db",
+    "desktop.ini",
+    "ehthumbs.db",
+    "ehthumbs_vista.db",
     // macOS junk
     "ds_store",
     // Thumbnails
-    "thumb", "thumbcache",
+    "thumb",
+    "thumbcache",
     // Build artifacts
-    "pdb", "ilk", "obj", "o", "a", "lib", "exp",
+    "pdb",
+    "ilk",
+    "obj",
+    "o",
+    "a",
+    "lib",
+    "exp",
     // Package lock files (usually regenerated)
-    "pyc", "pyo", "__pycache__",
+    "pyc",
+    "pyo",
+    "__pycache__",
     // Editor backups
-    "bak~", "~",
+    "bak~",
+    "~",
 ];
 
 // Auto-delete file names (exact match, case-insensitive)
@@ -97,10 +116,6 @@ const AUTO_DELETE_FOLDERS: &[&str] = &[
     ".idea",
     ".vscode",
     ".vs",
-    // Version control (untracked)
-    ".git",
-    ".svn",
-    ".hg",
     // Temp
     "tmp",
     "temp",
@@ -132,53 +147,73 @@ const PROTECTED_PATHS: &[&str] = &[
     "system volume information",
 ];
 
+// Any descendant of these operating-system locations remains protected.
+const ALWAYS_PROTECTED_SEGMENTS: &[&str] = &[
+    "windows",
+    "system32",
+    "syswow64",
+    "program files",
+    "program files (x86)",
+    "programdata",
+    "boot",
+    "recovery",
+    "system volume information",
+];
+
 // Important/protected extensions (require confirmation)
 const IMPORTANT_EXTENSIONS: &[&str] = &[
     // Documents
-    "doc", "docx", "pdf", "txt", "rtf", "odt", "xls", "xlsx", "ppt", "pptx",
-    // Media
-    "mp4", "mkv", "avi", "mov", "wmv", "flv", "webm",
-    "mp3", "wav", "flac", "aac", "ogg", "m4a", "wma",
-    "jpg", "jpeg", "png", "gif", "bmp", "svg", "webp", "ico", "tiff", "raw",
+    "doc", "docx", "pdf", "txt", "rtf", "odt", "xls", "xlsx", "ppt", "pptx", // Media
+    "mp4", "mkv", "avi", "mov", "wmv", "flv", "webm", "mp3", "wav", "flac", "aac", "ogg", "m4a",
+    "wma", "jpg", "jpeg", "png", "gif", "bmp", "svg", "webp", "ico", "tiff", "raw",
     // Code
-    "js", "ts", "jsx", "tsx", "py", "rs", "go", "java", "cpp", "c", "cs", "rb", "php", "swift", "kt",
-    "html", "css", "scss", "sass", "less",
-    // Config
-    "json", "xml", "yaml", "yml", "toml", "ini", "cfg", "conf",
-    // Archives
-    "zip", "rar", "7z", "tar", "gz", "bz2", "xz",
-    // Databases
-    "db", "sqlite", "sql", "mdb",
-    // Executables
+    "js", "ts", "jsx", "tsx", "py", "rs", "go", "java", "cpp", "c", "cs", "rb", "php", "swift",
+    "kt", "html", "css", "scss", "sass", "less", // Config
+    "json", "xml", "yaml", "yml", "toml", "ini", "cfg", "conf", // Archives
+    "zip", "rar", "7z", "tar", "gz", "bz2", "xz", // Databases
+    "db", "sqlite", "sql", "mdb", // Executables
     "exe", "msi", "app", "dmg", "deb", "rpm",
 ];
 
 /// Get the safety level for a file or folder
 pub fn get_safety_level(path: &Path) -> SafetyLevel {
+    if path.parent().is_none() {
+        return SafetyLevel::Protected;
+    }
     let path_str = path.to_string_lossy().to_lowercase();
-    
+    let parts: Vec<&str> = path_str
+        .split(['/', '\\'])
+        .filter(|part| !part.is_empty())
+        .collect();
+
+    if parts
+        .iter()
+        .any(|part| ALWAYS_PROTECTED_SEGMENTS.contains(part))
+    {
+        return SafetyLevel::Protected;
+    }
+
     // Check if path is protected
     for protected in PROTECTED_PATHS {
         if path_str.contains(protected) {
             // Check if it's a direct system path
-            let parts: Vec<&str> = path_str.split(['/', '\\']).collect();
             if parts.len() <= 3 && parts.iter().any(|p| p == protected) {
                 return SafetyLevel::Protected;
             }
         }
     }
-    
+
     // Check file name
     if let Some(name) = path.file_name() {
         let name_lower = name.to_string_lossy().to_lowercase();
-        
+
         // Check auto-delete names
         for auto_name in AUTO_DELETE_NAMES {
             if name_lower == *auto_name {
                 return SafetyLevel::AutoDelete;
             }
         }
-        
+
         // Check if it's a folder
         if path.is_dir() {
             for auto_folder in AUTO_DELETE_FOLDERS {
@@ -188,18 +223,18 @@ pub fn get_safety_level(path: &Path) -> SafetyLevel {
             }
         }
     }
-    
+
     // Check extension
     if let Some(ext) = path.extension() {
         let ext_lower = ext.to_string_lossy().to_lowercase();
-        
+
         // Check auto-delete extensions
         for auto_ext in AUTO_DELETE_EXTENSIONS {
             if ext_lower == *auto_ext {
                 return SafetyLevel::AutoDelete;
             }
         }
-        
+
         // Check important extensions
         for imp_ext in IMPORTANT_EXTENSIONS {
             if ext_lower == *imp_ext {
@@ -207,7 +242,7 @@ pub fn get_safety_level(path: &Path) -> SafetyLevel {
             }
         }
     }
-    
+
     // Check file age and size for heuristic (old large files more likely junk)
     if let Ok(metadata) = path.metadata() {
         if let Ok(modified) = metadata.modified() {
@@ -221,7 +256,7 @@ pub fn get_safety_level(path: &Path) -> SafetyLevel {
             }
         }
     }
-    
+
     // Default: require confirmation for unknown types
     SafetyLevel::ConfirmRequired
 }
@@ -231,17 +266,18 @@ pub fn get_file_info(path: &Path) -> Result<FileInfo, String> {
     if !path.exists() {
         return Err(format!("Path does not exist: {}", path.display()));
     }
-    
+
     let metadata = path.metadata().map_err(|e| e.to_string())?;
     let size = if path.is_dir() {
         calculate_dir_size(path).unwrap_or(0)
     } else {
         metadata.len()
     };
-    
+
     Ok(FileInfo {
         path: path.to_string_lossy().to_string(),
-        name: path.file_name()
+        name: path
+            .file_name()
             .map(|n| n.to_string_lossy().to_string())
             .unwrap_or_else(|| path.to_string_lossy().to_string()),
         size_bytes: size,
@@ -268,34 +304,34 @@ fn calculate_dir_size(path: &Path) -> Result<u64, std::io::Error> {
 }
 
 /// Delete a file with smart safety checks
-pub fn smart_delete_file(path: &Path, force: bool) -> Result<DeleteResult, String> {
+pub fn smart_delete_file(path: &Path, _force: bool) -> Result<DeleteResult, String> {
     if !path.exists() {
         return Err(format!("Path does not exist: {}", path.display()));
     }
-    
+
     let safety_level = get_safety_level(path);
-    
+
     // Never delete protected files
-    if safety_level == SafetyLevel::Protected && !force {
+    if safety_level == SafetyLevel::Protected {
         return Err("Cannot delete protected system file".to_string());
     }
-    
+
     // Check if confirmation is required
     let was_auto_delete = safety_level == SafetyLevel::AutoDelete;
-    
+
     let size = if path.is_file() {
         path.metadata().map(|m| m.len()).unwrap_or(0)
     } else {
         calculate_dir_size(path).unwrap_or(0)
     };
-    
+
     // Perform deletion
     let result = if path.is_dir() {
         delete_folder_recursive_internal(path)
     } else {
         delete_single_file(path)
     };
-    
+
     match result {
         Ok((files, folders)) => Ok(DeleteResult {
             success: true,
@@ -318,51 +354,14 @@ pub fn smart_delete_file(path: &Path, force: bool) -> Result<DeleteResult, Strin
 
 /// Delete a single file
 fn delete_single_file(path: &Path) -> Result<(u64, u64), String> {
-    // Try to move to trash first
-    match trash::delete(path) {
-        Ok(_) => Ok((1, 0)),
-        Err(_) => {
-            // Fallback to permanent delete
-            fs::remove_file(path).map_err(|e| e.to_string())?;
-            Ok((1, 0))
-        }
-    }
+    trash::delete(path).map_err(|error| format!("Could not move item to trash: {error}"))?;
+    Ok((1, 0))
 }
 
 /// Delete a folder recursively
 fn delete_folder_recursive_internal(path: &Path) -> Result<(u64, u64), String> {
-    let mut files_deleted = 0u64;
-    let mut folders_deleted = 0u64;
-    
-    // Try to move to trash first (handles the whole folder)
-    match trash::delete(path) {
-        Ok(_) => {
-            // Count items (approximate)
-            folders_deleted = 1;
-            Ok((files_deleted, folders_deleted))
-        }
-        Err(_) => {
-            // Fallback to manual recursive delete
-            if path.is_dir() {
-                for entry in fs::read_dir(path).map_err(|e| e.to_string())? {
-                    let entry = entry.map_err(|e| e.to_string())?;
-                    let entry_path = entry.path();
-                    
-                    if entry_path.is_dir() {
-                        let (f, d) = delete_folder_recursive_internal(&entry_path)?;
-                        files_deleted += f;
-                        folders_deleted += d;
-                    } else {
-                        fs::remove_file(&entry_path).map_err(|e| e.to_string())?;
-                        files_deleted += 1;
-                    }
-                }
-                fs::remove_dir(path).map_err(|e| e.to_string())?;
-                folders_deleted += 1;
-            }
-            Ok((files_deleted, folders_deleted))
-        }
-    }
+    trash::delete(path).map_err(|error| format!("Could not move folder to trash: {error}"))?;
+    Ok((0, 1))
 }
 
 /// Bulk delete multiple paths
@@ -372,25 +371,25 @@ pub fn bulk_delete(paths: Vec<&Path>, skip_confirm: bool) -> DeleteResult {
     let mut total_folders = 0u64;
     let mut errors = Vec::new();
     let mut all_auto = true;
-    
+
     for path in paths {
         let safety = get_safety_level(path);
-        
+
         if safety == SafetyLevel::Protected {
             errors.push(format!("Skipped protected: {}", path.display()));
             continue;
         }
-        
+
         if safety == SafetyLevel::ConfirmRequired && !skip_confirm {
             errors.push(format!("Requires confirmation: {}", path.display()));
             all_auto = false;
             continue;
         }
-        
+
         if safety == SafetyLevel::ConfirmRequired {
             all_auto = false;
         }
-        
+
         match smart_delete_file(path, false) {
             Ok(result) => {
                 total_bytes += result.bytes_freed;
@@ -403,7 +402,7 @@ pub fn bulk_delete(paths: Vec<&Path>, skip_confirm: bool) -> DeleteResult {
             }
         }
     }
-    
+
     DeleteResult {
         success: errors.is_empty(),
         bytes_freed: total_bytes,
@@ -425,7 +424,7 @@ pub struct DeletedPayload {
     pub was_auto: bool,
 }
 
-#[derive(Clone, Debug, Serialize)]  
+#[derive(Clone, Debug, Serialize)]
 pub struct DeleteFailedPayload {
     pub path: String,
     pub reason: String,

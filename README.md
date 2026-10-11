@@ -16,10 +16,11 @@ Syslume brings storage analysis, CPU and RAM monitoring, battery health, running
 Get **Syslume 1.1.0** for Windows 10/11 x64:
 
 - [Windows installer (.exe)](https://github.com/Waqar-743/Syslume/releases/download/v1.1.0/Syslume_1.1.0_x64-setup.exe)
+- [Windows installer (.msi)](https://github.com/Waqar-743/Syslume/releases/download/v1.1.0/Syslume_1.1.0_x64_en-US.msi)
 - [Standalone application (.exe)](https://github.com/Waqar-743/Syslume/releases/download/v1.1.0/Syslume.exe)
 - [SHA-256 checksums](https://github.com/Waqar-743/Syslume/releases/download/v1.1.0/SHA256SUMS.txt)
 
-Microsoft WebView2 is required. The installer is unsigned and Windows may show a publisher warning. The standalone executable uses the same WebView2 runtime. This release was exercised on Windows 11; installer installation/upgrade and Windows 10 testing remain unverified. See the [validation report](docs/syslume/VALIDATION.md) for the tested hardware, measurements, and remaining checks.
+Microsoft WebView2 is required. Both installers are unsigned and Windows may show a publisher warning. The standalone executable uses the same WebView2 runtime. This release was exercised on Windows 11; installer installation/upgrade and Windows 10 testing remain unverified. See the [validation report](docs/syslume/VALIDATION.md) for the tested hardware, measurements, and remaining checks.
 
 ## Version 1.1
 
@@ -63,11 +64,11 @@ Production build:
 
 ```powershell
 $env:CARGO_BUILD_JOBS = '1'
-npm run tauri -- build --bundles nsis
+npm run tauri -- build --bundles nsis,msi
 ./scripts/stage-release.ps1
 ```
 
-The NSIS installer is written to `src-tauri/target/release/bundle/nsis/` (or the configured `CARGO_TARGET_DIR`). The staging script verifies product/version metadata and copies the installer, standalone executable and SHA-256 checksums into `release/`.
+The EXE installer is written to `src-tauri/target/release/bundle/nsis/` and the MSI to `src-tauri/target/release/bundle/msi/` (or the configured `CARGO_TARGET_DIR`). The staging script verifies product/version metadata and the MSI upgrade identifier, then copies both installers, the standalone executable and SHA-256 checksums into `release/`. MSI packaging retains the previous DiskSight upgrade identifier; actual upgrade behavior still requires manual validation.
 
 Verification:
 

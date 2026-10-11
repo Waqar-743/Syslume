@@ -28,6 +28,11 @@
     "active": true,
     "targets": "all",
     "windows": {
+      "wix": {
+        "upgradeCode": "b032836f-59f8-54b7-ad17-7711558cf33e",
+        "bannerPath": "icons/installer-msi-banner.bmp",
+        "dialogImagePath": "icons/installer-msi-dialog.bmp"
+      },
       "nsis": {
         "headerImage": "icons/installer-header.bmp",
         "sidebarImage": "icons/installer-sidebar.bmp",

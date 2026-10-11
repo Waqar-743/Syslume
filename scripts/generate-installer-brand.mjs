@@ -3,7 +3,9 @@ import sharp from 'sharp';
 const mark = fs.readFileSync('public/syslume-mark.svg','utf8').match(/<g[\s\S]*<\/g>/)[0];
 const header = `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="57"><rect width="150" height="57" fill="#f0f1e9"/><g transform="translate(5 6) scale(.07)">${mark}</g><text x="58" y="34" fill="#233529" font-family="Segoe UI" font-size="20" font-weight="600">Syslume</text></svg>`;
 const sidebar = `<svg xmlns="http://www.w3.org/2000/svg" width="164" height="314"><rect width="164" height="314" fill="#263c2b"/><path d="M0 262 70 220 164 268V314H0Z" fill="#344a35"/><g transform="translate(34 72) scale(.15)">${mark.replace('#31563a','#eaf0de')}</g><text x="82" y="202" text-anchor="middle" fill="#eaf0de" font-family="Segoe UI" font-size="23" font-weight="600">Syslume</text><text x="82" y="224" text-anchor="middle" fill="#b4ca97" font-family="Segoe UI" font-size="10">System intelligence</text></svg>`;
-for(const [name,svg] of [['header',header],['sidebar',sidebar]]) {
+const msiBanner = `<svg xmlns="http://www.w3.org/2000/svg" width="493" height="58"><rect width="493" height="58" fill="#f0f1e9"/><g transform="translate(443 6) scale(.07)">${mark}</g></svg>`;
+const msiDialog = `<svg xmlns="http://www.w3.org/2000/svg" width="493" height="312"><rect width="493" height="312" fill="#f0f1e9"/><rect width="164" height="312" fill="#263c2b"/><path d="M0 262 70 220 164 268V312H0Z" fill="#344a35"/><g transform="translate(34 72) scale(.15)">${mark.replace('#31563a','#eaf0de')}</g><text x="82" y="202" text-anchor="middle" fill="#eaf0de" font-family="Segoe UI" font-size="23" font-weight="600">Syslume</text><text x="82" y="224" text-anchor="middle" fill="#b4ca97" font-family="Segoe UI" font-size="10">System intelligence</text></svg>`;
+for(const [name,svg] of [['header',header],['sidebar',sidebar],['msi-banner',msiBanner],['msi-dialog',msiDialog]]) {
   fs.writeFileSync(`docs/syslume/branding/installer-${name}.svg`,svg);
   await sharp(Buffer.from(svg)).png().toFile(`docs/syslume/branding/installer-${name}.png`);
   const {data,info}=await sharp(Buffer.from(svg)).removeAlpha().raw().toBuffer({resolveWithObject:true});

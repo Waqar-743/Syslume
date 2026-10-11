@@ -33,7 +33,7 @@ jobs:
           if ($LASTEXITCODE -eq 0) {
             $release = $existing | ConvertFrom-Json
             $names = @($release.assets.name)
-            $complete = (-not $release.isDraft) -and $names.Contains('Syslume.exe') -and $names.Contains("Syslume_$($config.version)_x64-setup.exe") -and $names.Contains('SHA256SUMS.txt')
+            $complete = (-not $release.isDraft) -and $names.Contains('Syslume.exe') -and $names.Contains("Syslume_$($config.version)_x64-setup.exe") -and $names.Contains("Syslume_$($config.version)_x64_en-US.msi") -and $names.Contains('SHA256SUMS.txt')
           }
           "complete=$($complete.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
           # A missing release is expected for a new tag.
@@ -66,6 +66,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_BUILD_JOBS: 1
         with:
+          args: --bundles nsis,msi
           tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
           releaseName: "Syslume v__VERSION__"
           releaseBody: "See the assets below to download the latest version of Syslume."
@@ -81,5 +82,5 @@ jobs:
         run: |
           ./scripts/stage-release.ps1
           $config = Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json
-          gh release upload "v$($config.version)" release/Syslume.exe release/SHA256SUMS.txt --clobber
+          gh release upload "v$($config.version)" release/Syslume.exe "release/Syslume_$($config.version)_x64_en-US.msi" release/SHA256SUMS.txt --clobber
           if ($LASTEXITCODE -ne 0) { throw 'Release asset upload failed.' }

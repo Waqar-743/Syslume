@@ -20,5 +20,5 @@ export const FORMAT_SIZE = (bytes: number, precision = 1): string => {
   return `${value.toFixed(index === 0 ? 0 : precision)} ${units[index]}`;
 };
 
-export const SETTINGS_KEY = "disksight.settings.v2";
-export const HISTORY_KEY = "disksight.history.v2";
+export const SETTINGS_KEY = "syslume.settings.v2";
+export const HISTORY_KEY = "syslume.history.v2";

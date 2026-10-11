@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Syslume — visual approval</title>
+<style>
+:root{font-family:"Segoe UI Variable","Segoe UI",sans-serif;color:#183c34;background:#f0ede5;font-synthesis:none;font-variant-numeric:tabular-nums}
+*{box-sizing:border-box}body{margin:0}a{color:inherit}a:focus-visible{outline:3px solid #986d28;outline-offset:5px}header,main,footer{max-width:1320px;margin:auto;padding:32px clamp(18px,4vw,56px)}
+header{padding-top:54px;padding-bottom:24px}.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#52655c}h1{font-size:clamp(32px,5vw,62px);font-weight:650;letter-spacing:-.055em;line-height:1.08;margin:15px 0}p{max-width:720px;line-height:1.65;color:#52655c}nav{display:flex;flex-wrap:wrap;gap:24px;font-weight:600;font-size:14px;margin-top:24px}.status{display:inline-block;border:1px solid #c3cfc6;padding:7px 12px;font-size:12px;background:#e4e9df}
+section{margin:0 0 56px}section>h2{font-size:28px;letter-spacing:-.03em;margin:0 0 12px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:26px}article{min-width:0;background:#faf8f2;border:1px solid #d5dcd1;border-radius:10px;overflow:hidden}
+article>a{display:block}img{display:block;width:100%;height:auto}.caption{padding:20px 22px 22px;border-top:1px solid #e1e4d9}.caption h3{font-size:18px;font-weight:650;letter-spacing:-.025em;margin:0 0 7px}.number{font-size:12px;color:#856327;margin-right:10px}.caption p{font-size:14px;margin:0;line-height:1.55}.caption small{display:block;color:#52655c;font-size:12px;margin-top:10px}
+.stories{display:grid;grid-template-columns:1fr;gap:28px;margin-top:26px}.stories article{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(220px,1fr);align-items:center}.stories .caption{border-top:0;padding:30px}.stories img{aspect-ratio:3/2;object-fit:contain}
+.recommend{padding:18px 22px;border-left:3px solid #9c824e;background:#e4e9df;font-size:14px}.sources{display:grid;gap:10px;font-size:14px}.palette{display:flex;flex-wrap:wrap;gap:16px;padding:14px 0}.swatch{display:flex;align-items:center;gap:10px;font-size:13px}.swatch i{display:block;width:26px;height:26px;border:1px solid #a6b3a6;border-radius:5px}
+footer{padding-top:0;padding-bottom:50px;font-size:14px;border-top:1px solid #d5dcd1}
+@media(max-width:650px){.grid{gap:16px;grid-template-columns:1fr}.stories article{display:block}.stories .caption{padding:20px 22px}.caption{padding:16px}header{padding-top:28px}}
+@media print{header,main,footer{padding:16px}article{break-inside:avoid}.grid{gap:14px}nav{display:none}}
+</style>
+</head>
+<body>
+<header>
+<span class="eyebrow">DiskSight → Syslume · approval checkpoint</span>
+<h1>A clearer view<br>of your system.</h1>
+<p>Ten independent logo directions and three proposed storytelling images. Final selection: original logo 03 and illustration A. B and C are archived, rejected concepts. Click any image to inspect the full-size original.</p>
+<span class="status">Approved: original 03 + A · finalized for Syslume 1.1</span>
+<nav aria-label="Review sections"><a href="#logos">10 logo concepts</a><a href="#stories">Storytelling images</a><a href="#direction">Design direction</a><a href="AUDIT.md">Codebase audit</a></nav>
+</header>
+<main>
+<section id="logos">
+<h2>Choose a logo direction</h2>
+<p>Each option explores a different silhouette and idea. These generated boards establish a direction; the selected mark will receive a clean vector redraw, typography refinement, and actual Windows icon testing.</p>
+<div class="grid">
+<article id="logo-01"><a href="concepts/logo-01.png" target="_blank" rel="noreferrer" aria-label="Open logo 01, Lumen aperture, full size"><img src="concepts/logo-01.png" alt="Syslume concept 01: Lumen aperture" width="1254" height="1254"></a><div class="caption"><h3><span class="number">01</span>Lumen aperture</h3><p>An opening that turns inspection into clarity.</p></div></article>
+<article id="logo-02"><a href="concepts/logo-02.png" target="_blank" rel="noreferrer" aria-label="Open logo 02, Karakoram window, full size"><img src="concepts/logo-02.png" alt="Syslume concept 02: Karakoram window" width="1254" height="1254"></a><div class="caption"><h3><span class="number">02</span>Karakoram window</h3><p>A mountain route inside a compact window.</p></div></article>
+<article id="logo-03"><a href="concepts/logo-03.png" target="_blank" rel="noreferrer" aria-label="Open logo 03, Woven logic, full size"><img src="concepts/logo-03.png" alt="Syslume concept 03: Woven logic" width="1254" height="1254"></a><div class="caption"><h3><span class="number">03</span>Woven logic</h3><p>Selected: angular interlocking diamond bands, using the original attached reference.</p></div></article>
+<article id="logo-04"><a href="concepts/logo-04.png" target="_blank" rel="noreferrer" aria-label="Open logo 04, Signal monogram, full size"><img src="concepts/logo-04.png" alt="Syslume concept 04: Signal monogram" width="1254" height="1254"></a><div class="caption"><h3><span class="number">04</span>Signal monogram</h3><p>A stepped S built from ordered signal bars.</p></div></article>
+<article id="logo-05"><a href="concepts/logo-05.png" target="_blank" rel="noreferrer" aria-label="Open logo 05, Valley contours, full size"><img src="concepts/logo-05.png" alt="Syslume concept 05: Valley contours" width="1254" height="1254"></a><div class="caption"><h3><span class="number">05</span>Valley contours</h3><p>A topographic reading with a quiet focal point.</p></div></article>
+<article id="logo-06"><a href="concepts/logo-06.png" target="_blank" rel="noreferrer" aria-label="Open logo 06, Crafted window, full size"><img src="concepts/logo-06.png" alt="Syslume concept 06: Crafted window" width="1254" height="1254"></a><div class="caption"><h3><span class="number">06</span>Crafted window</h3><p>An architectural portal inspired by precise joinery.</p></div></article>
+<article id="logo-07"><a href="concepts/logo-07.png" target="_blank" rel="noreferrer" aria-label="Open logo 07, Horizon observer, full size"><img src="concepts/logo-07.png" alt="Syslume concept 07: Horizon observer" width="1254" height="1254"></a><div class="caption"><h3><span class="number">07</span>Horizon observer</h3><p>An instrument-like horizon and observation point.</p></div></article>
+<article id="logo-08"><a href="concepts/logo-08.png" target="_blank" rel="noreferrer" aria-label="Open logo 08, System prism, full size"><img src="concepts/logo-08.png" alt="Syslume concept 08: System prism" width="1254" height="1254"></a><div class="caption"><h3><span class="number">08</span>System prism</h3><p>Complex inputs resolved into an ordered beam.</p></div></article>
+<article id="logo-09"><a href="concepts/logo-09.png" target="_blank" rel="noreferrer" aria-label="Open logo 09, Modular intelligence, full size"><img src="concepts/logo-09.png" alt="Syslume concept 09: Modular intelligence" width="1254" height="1254"></a><div class="caption"><h3><span class="number">09</span>Modular intelligence</h3><p>Six modules arranged as a compact treemap.</p></div></article>
+<article id="logo-10"><a href="concepts/logo-10.png" target="_blank" rel="noreferrer" aria-label="Open logo 10, Quiet wordmark, full size"><img src="concepts/logo-10.png" alt="Syslume concept 10: Quiet wordmark" width="1254" height="1254"></a><div class="caption"><h3><span class="number">10</span>Quiet wordmark</h3><p>A typographic identity with a light-cut l.</p></div></article>
+</div>
+<p class="recommend">The user selected original 03 and approved only A. The current app uses forest green, ivory, charcoal and brass; pink, blue and red are excluded.</p>
+</section>
+<section id="stories">
+<h2>Storytelling approval record</h2>
+<p>Use these sparingly on welcome, before-first-scan, and About screens. Live monitoring remains focused on readable metrics. These are imagined editorial scenes, not documentary representations of specific places or traditional motifs.</p>
+<div class="stories">
+<article id="story-A"><a href="concepts/story-a.png" target="_blank" rel="noreferrer" aria-label="Open illustration A, Clarity at the summit, full size"><img src="concepts/story-a.png" alt="An imagined Karakoram landscape viewed through a clear observation window." width="1536" height="1024" loading="lazy"></a><div class="caption"><h3><span class="number">A</span>Clarity at the summit</h3><p>An imagined Karakoram landscape viewed through a clear observation window.</p><small>Proposed placement: First-run welcome</small></div></article>
+<article id="story-B"><a href="concepts/story-b.png" target="_blank" rel="noreferrer" aria-label="Open illustration B, A map of what matters, full size"><img src="concepts/story-b.png" alt="Terrain parcels connect exploration with mapping disk space." width="1536" height="1024" loading="lazy"></a><div class="caption"><h3><span class="number">B</span>A map of what matters</h3><p>Terrain parcels connect exploration with mapping disk space.</p><small>Proposed placement: Storage before the first scan</small></div></article>
+<article id="story-C"><a href="concepts/story-c.png" target="_blank" rel="noreferrer" aria-label="Open illustration C, Patterns into insight, full size"><img src="concepts/story-c.png" alt="Timber, stone and a dawn horizon connect craft with careful observation." width="1536" height="1024" loading="lazy"></a><div class="caption"><h3><span class="number">C</span>Patterns into insight</h3><p>Timber, stone and a dawn horizon connect craft with careful observation.</p><small>Proposed placement: Optional About panel</small></div></article>
+</div>
+</section>
+<section id="direction">
+<h2>Quiet identity. Useful intelligence.</h2>
+<p>Calm ivory surfaces, forest and sage accents, and brass used as a small highlight. Familiar Windows typography and tabular numbers keep everyday monitoring readable. Begin with an overview; reveal per-core graphs, capacity details, hardware inventory, and engine metrics on demand.</p>
+<div class="palette"><span class="swatch"><i style="background:#426b42"></i>Forest · #426B42</span><span class="swatch"><i style="background:#aed09b"></i>Sage · #AED09B</span><span class="swatch"><i style="background:#efece3"></i>Stone · #EFECE3</span><span class="swatch"><i style="background:#b59558"></i>Brass · #B59558</span></div>
+<p>The direction draws on Karakoram terrain, Balti timber craftsmanship, and Chitral’s traditions of observation and craft. It interprets those references as clarity, exploration, and careful structure.</p>
+<div class="sources">
+<a href="https://whc.unesco.org/en/tentativelists/6112/" target="_blank" rel="noreferrer">UNESCO · Central Karakoram landscape</a>
+<a href="https://the.akdn/en/resources-media/resources/publications/aga-khan-trust-culture-shigar-fort-residence-baltistan" target="_blank" rel="noreferrer">Aga Khan Trust for Culture · Shigar and Balti woodcarving</a>
+<a href="https://www.unesco.org/en/articles/preserving-heritage-and-empowering-livelihoods-chitral" target="_blank" rel="noreferrer">UNESCO · Heritage and craft in Chitral</a>
+<a href="https://heritage.pakistan.gov.pk/SiteImage/Misc/files/ICH%20Pakistan%20Low.pdf" target="_blank" rel="noreferrer">Pakistan National Heritage · Suri Jagek and living traditions</a>
+</div>
+</section>
+</main>
+<footer><p>Branding finalized. The rejected concepts are retained here as history and are not included in the desktop app. Prompts and sources are in <a href="concepts/manifest.json">the manifest</a>.</p></footer>
+</body>
+</html>

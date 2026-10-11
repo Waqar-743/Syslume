@@ -8,7 +8,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use ignore::WalkBuilder;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, State, Emitter};
 use uuid::Uuid;
 
 use crate::scan::delete::{
@@ -30,6 +30,7 @@ pub fn start_scan(
     app_handle: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<ScanHandle, String> {
+    let root_path = crate::scan::engine::normalize_root(&root_path)?.to_string_lossy().to_string();
     let scan_id = Uuid::new_v4().to_string();
     let scan_state = ScanState::new();
     let started_at = scan_state
@@ -98,6 +99,9 @@ pub fn start_scan(
                 state_clone.remove_scan(&scan_id_for_closure);
             }
             Err(ScanError::Failed(message)) => {
+                let _ = app_handle_clone.emit("scan://failed", ErrorPayload {
+                    scan_id: scan_id_for_closure.clone(), message: message.clone(), path: Some(root_path_clone.clone()),
+                });
                 emit_error(
                     &app_handle_clone,
                     ErrorPayload {
@@ -206,27 +210,19 @@ pub fn open_in_explorer(path: String) -> Result<(), String> {
 /// Delete a file or folder
 #[tauri::command]
 pub fn delete_path(path: String, to_trash: bool) -> Result<(), String> {
+    if !to_trash { return Err("Syslume only moves reviewed items to the Recycle Bin. Permanent deletion is disabled.".into()); }
     let path = Path::new(&path);
 
     if !path.exists() {
         return Err(format!("Path does not exist: {}", path.display()));
     }
 
-    if get_safety_level(path) == SafetyLevel::Protected {
+    let canonical = path.canonicalize().map_err(|e| e.to_string())?;
+    if get_safety_level(path) == SafetyLevel::Protected || get_safety_level(&canonical) == SafetyLevel::Protected {
         return Err("Cannot delete a protected system path".to_string());
     }
 
-    if to_trash {
-        // Move to trash/recycle bin
-        trash::delete(path).map_err(|e| e.to_string())?;
-    } else {
-        // Permanent delete
-        if path.is_dir() {
-            fs::remove_dir_all(path).map_err(|e| e.to_string())?;
-        } else {
-            fs::remove_file(path).map_err(|e| e.to_string())?;
-        }
-    }
+    trash::delete(path).map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -358,7 +354,12 @@ pub fn smart_delete(
 
 /// Bulk delete multiple paths with smart safety checks
 #[tauri::command]
-pub fn bulk_smart_delete(paths: Vec<String>, force: bool, app_handle: AppHandle) -> DeleteResult {
+pub async fn bulk_smart_delete(paths: Vec<String>, force: bool, app_handle: AppHandle) -> Result<DeleteResult, String> {
+    tauri::async_runtime::spawn_blocking(move || bulk_smart_delete_inner(paths, force, app_handle))
+        .await.map_err(|error| error.to_string())
+}
+
+fn bulk_smart_delete_inner(paths: Vec<String>, force: bool, app_handle: AppHandle) -> DeleteResult {
     let mut total_bytes = 0u64;
     let mut total_files = 0u64;
     let mut total_folders = 0u64;
@@ -454,10 +455,15 @@ pub struct DuplicateGroup {
 
 /// Find byte-identical files by grouping on size before computing SHA-256.
 #[tauri::command]
-pub fn find_duplicates(
+pub async fn find_duplicates(
     root_path: String,
     min_size_bytes: u64,
 ) -> Result<Vec<DuplicateGroup>, String> {
+    tauri::async_runtime::spawn_blocking(move || find_duplicates_inner(root_path, min_size_bytes))
+        .await.map_err(|e| e.to_string())?
+}
+
+fn find_duplicates_inner(root_path: String, min_size_bytes: u64) -> Result<Vec<DuplicateGroup>, String> {
     let root = crate::scan::engine::normalize_root(&root_path)?;
     let mut by_size: HashMap<u64, Vec<PathBuf>> = HashMap::new();
     let minimum = min_size_bytes.max(1);
@@ -493,7 +499,7 @@ pub fn find_duplicates(
                 hash,
                 size_bytes,
                 reclaimable_bytes: size_bytes.saturating_mul((matches.len() - 1) as u64),
-                files: matches
+                files: { let mut matches = matches; matches.sort(); matches }
                     .into_iter()
                     .map(|path| DuplicateFile {
                         path: path.to_string_lossy().to_string(),
@@ -511,7 +517,7 @@ fn hash_file(path: &Path) -> Result<String, String> {
     let file = File::open(path).map_err(|error| error.to_string())?;
     let mut reader = BufReader::with_capacity(1024 * 1024, file);
     let mut hasher = Sha256::new();
-    let mut buffer = [0_u8; 1024 * 1024];
+    let mut buffer = vec![0_u8; 64 * 1024];
     loop {
         let read = reader
             .read(&mut buffer)
@@ -522,4 +528,23 @@ fn hash_file(path: &Path) -> Result<String, String> {
         hasher.update(&buffer[..read]);
     }
     Ok(format!("{:x}", hasher.finalize()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn duplicates_require_identical_contents_and_keep_one_copy() {
+        let directory = tempfile::tempdir().unwrap();
+        std::fs::write(directory.path().join("a.bin"), vec![1; 100_000]).unwrap();
+        std::fs::write(directory.path().join("b.bin"), vec![1; 100_000]).unwrap();
+        std::fs::write(directory.path().join("c.bin"), vec![2; 100_000]).unwrap();
+        let root = directory.path().to_string_lossy().to_string();
+        let groups = find_duplicates_inner(root.clone(), 1).unwrap();
+        assert_eq!(groups.len(), 1);
+        assert_eq!(groups[0].files.len(), 2);
+        assert_eq!(groups[0].reclaimable_bytes, 100_000);
+        assert!(find_duplicates_inner(root, 100_001).unwrap().is_empty());
+        assert!(directory.path().join("a.bin").exists());
+    }
 }

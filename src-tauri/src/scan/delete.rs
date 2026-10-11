@@ -86,8 +86,6 @@ const AUTO_DELETE_NAMES: &[&str] = &[
     "npm-debug.log",
     "yarn-error.log",
     "yarn-debug.log",
-    ".npmrc",
-    ".yarnrc",
     "debug.log",
     "error.log",
     "access.log",
@@ -113,8 +111,6 @@ const AUTO_DELETE_FOLDERS: &[&str] = &[
     ".nuxt",
     ".turbo",
     // IDE/Editor
-    ".idea",
-    ".vscode",
     ".vs",
     // Temp
     "tmp",
@@ -293,7 +289,12 @@ fn calculate_dir_size(path: &Path) -> Result<u64, std::io::Error> {
         for entry in fs::read_dir(path)? {
             let entry = entry?;
             let path = entry.path();
-            if path.is_dir() {
+            let metadata = fs::symlink_metadata(&path)?;
+            #[cfg(windows)]
+            let link = { use std::os::windows::fs::MetadataExt; metadata.file_attributes() & 0x400 != 0 };
+            #[cfg(not(windows))]
+            let link = metadata.file_type().is_symlink();
+            if metadata.is_dir() && !link {
                 size += calculate_dir_size(&path).unwrap_or(0);
             } else {
                 size += entry.metadata().map(|m| m.len()).unwrap_or(0);
@@ -304,19 +305,31 @@ fn calculate_dir_size(path: &Path) -> Result<u64, std::io::Error> {
 }
 
 /// Delete a file with smart safety checks
-pub fn smart_delete_file(path: &Path, _force: bool) -> Result<DeleteResult, String> {
+pub fn smart_delete_file(path: &Path, force: bool) -> Result<DeleteResult, String> {
     if !path.exists() {
         return Err(format!("Path does not exist: {}", path.display()));
     }
 
+    let canonical = path.canonicalize().map_err(|e| e.to_string())?;
     let safety_level = get_safety_level(path);
 
     // Never delete protected files
-    if safety_level == SafetyLevel::Protected {
+    if safety_level == SafetyLevel::Protected || get_safety_level(&canonical) == SafetyLevel::Protected {
         return Err("Cannot delete protected system file".to_string());
     }
 
+    let metadata = fs::symlink_metadata(path).map_err(|e| e.to_string())?;
+    #[cfg(windows)]
+    { use std::os::windows::fs::MetadataExt;
+      if metadata.file_attributes() & 0x400 != 0 { return Err("Links and reparse points cannot be cleaned by Syslume.".into()); }
+    }
+    #[cfg(not(windows))]
+    if metadata.file_type().is_symlink() { return Err("Links cannot be cleaned by Syslume.".into()); }
+
     // Check if confirmation is required
+    if safety_level == SafetyLevel::ConfirmRequired && !force {
+        return Err("This item requires explicit cleanup confirmation.".into());
+    }
     let was_auto_delete = safety_level == SafetyLevel::AutoDelete;
 
     let size = if path.is_file() {
@@ -436,4 +449,19 @@ pub fn emit_deleted(app_handle: &AppHandle, payload: DeletedPayload) {
 
 pub fn emit_delete_failed(app_handle: &AppHandle, payload: DeleteFailedPayload) {
     let _ = app_handle.emit("delete://failed", payload);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn confirmation_and_protected_paths_cannot_be_bypassed() {
+        let directory = tempfile::tempdir().unwrap();
+        let file = directory.path().join("important.data");
+        fs::write(&file, b"keep me").unwrap();
+        assert!(smart_delete_file(&file, false).is_err());
+        assert!(file.exists());
+        #[cfg(windows)]
+        assert!(smart_delete_file(Path::new("C:/Windows"), true).is_err());
+    }
 }

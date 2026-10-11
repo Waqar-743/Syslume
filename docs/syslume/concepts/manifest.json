@@ -1,0 +1,165 @@
+{
+  "generatedWith": "Built-in image_gen",
+  "approvalStatus": "Final: original attached 03 logo and A only. B/C rejected. Refined A recolored to approved palette.",
+  "assets": [
+    {
+      "id": "01",
+      "name": "Lumen aperture",
+      "description": "An opening that turns inspection into clarity.",
+      "key": "logo01",
+      "file": "logo-01.png",
+      "kind": "logo",
+      "source": "C:\\Users\\dell\\.codex\\generated_images\\01a129ba-38ed-77b0-8b02-e9f4146ef5a2\\exec-978d6bd3-834e-4975-a3ef-6b9b7668c9c6.png",
+      "prompt": "Use case: logo-brand. Asset type: concept 01 of 10, brand approval only, for Syslume, a premium Windows system intelligence app. Create one professional identity presentation on warm ivory, square 1024x1024. Exact label at top left: \"01 / LUMEN APERTURE\". Main emblem: a bold deep pine green circle with a precision off-centre rectangular aperture letting one narrow ivory ray through; one warm brass edge, sophisticated negative space, two-dimensional vector-like geometry. The mark must suggest clarity and inspection, not a camera icon. Place refined custom sans-serif wordmark \"Syslume\" below. Show a small monochrome version and app-size silhouette at the bottom. Restrained Swiss identity design, abundant negative space, crisp contours. No 3D, mockups, shadows, gradients, stock tech circuit icon, crescent, flags, watermarks. This concept explores an optical aperture, no mountain or S monogram.",
+      "approval": "not approved for integration"
+    },
+    {
+      "id": "02",
+      "name": "Karakoram window",
+      "description": "A mountain route inside a compact window.",
+      "key": "logo02",
+      "file": "logo-02.png",
+      "kind": "logo",
+      "source": "C:\\Users\\dell\\.codex\\generated_images\\01a129ba-38ed-77b0-8b02-e9f4146ef5a2\\exec-b1c7c265-e087-4688-bd19-7c322a54d9f5.png",
+      "prompt": "Use case: logo-brand. Asset type: independent professional Syslume logo approval concept 02 of 10. Square 1024x1024 warm ivory identity presentation. Exact label at top left: \"02 / KARAKORAM WINDOW\". Main central emblem: A single angular, asymmetric cut-paper mountain ridge contained inside a chamfered square window. The negative space forms a subtle rising S route; broad shapes stay legible at 24 pixels. Inspired by Baltistan's Karakoram landscape, not a literal tourist mountain logo. Deep pine mark, restrained brass sun dot. No circle aperture. Place refined premium sans-serif wordmark \"Syslume\" beneath. Small monochrome mark and 24-pixel-scale silhouette along bottom. Crisp vector-like contours, generous negative space, exceptional original identity design. No 3D, gradients, shadows, photo mockups, watermarks, flags, religious symbolism. One distinct mark, no extra variants.",
+      "approval": "not approved for integration"
+    },
+    {
+      "id": "03",
+      "name": "Woven logic",
+      "description": "An asymmetric woven structure with a single crossing thread.",
+      "key": "logo03",
+      "file": "logo-03.png",
+      "kind": "logo",
+      "source": "C:\\Users\\dell\\.codex\\generated_images\\01a129ba-38ed-77b0-8b02-e9f4146ef5a2\\exec-baff56a3-4091-490c-818c-f25a2e27cc67.png",
+      "prompt": "Use case: logo-brand. Asset type: Syslume logo concept 03 of 10 \"WOVEN LOGIC\", approval-only. Square ivory identity board, exact label \"03 / WOVEN LOGIC\". Create an ORIGINAL professional compact asymmetric woven mark: three gently curved parallel vertical pine ribbons, crossed by ONE clean horizontal brass thread. Ends are softly rounded. A simple six-crossing textile structure with clear alternating over-under gaps and an overall rectangular silhouette. Subtle inspiration from northern Pakistani textile craft, purely contemporary abstraction. No radial rotation or fourfold symmetry. No diamond construction. MUST NOT resemble a swastika, hooked cross, religious symbol, political symbol, knot logo or ancient emblem. Main mark centered above exact premium sans-serif wordmark \"Syslume\". Small monochrome and small-scale mark below. Flat solid vector-like geometry, crisp edges, abundant negative space, no gradients, no 3D, no shadows, no watermarks, no mountains. Prioritize legibility and calm original design.",
+      "approval": "approved original attached angular mark; alternate archived"
+    },
+    {
+      "id": "04",
+      "name": "Signal monogram",
+      "description": "A stepped S built from ordered signal bars.",
+      "key": "logo04",
+      "file": "logo-04.png",
+      "kind": "logo",
+      "source": "C:\\Users\\dell\\.codex\\generated_images\\01a129ba-38ed-77b0-8b02-e9f4146ef5a2\\exec-a48cfd12-4426-4682-a51c-f38f3dbf3fe5.png",
+      "prompt": "Use case: logo-brand. Asset type: independent professional Syslume logo approval concept 04 of 10. Square 1024x1024 warm ivory identity presentation. Exact label at top left: \"04 / SIGNAL MONOGRAM\". Main central emblem: A boldly drawn custom S monogram assembled from three horizontal precision bars joined by square steps, suggesting an orderly data signal and system intelligence. Rounded outside corners and incisive inner cuts. One pine color. No mountains, sun, weave, circular icon. Place refined premium sans-serif wordmark \"Syslume\" beneath. Small monochrome mark and 24-pixel-scale silhouette along bottom. Crisp vector-like contours, generous negative space, exceptional original identity design. No 3D, gradients, shadows, photo mockups, watermarks, flags, religious symbolism. One distinct mark, no extra variants.",
+      "approval": "not approved for integration"
+    },
+    {
+      "id": "05",
+      "name": "Valley contours",
+      "description": "A topographic reading with a quiet focal point.",
+      "key": "logo05",
+      "file": "logo-05.png",
+      "kind": "logo",
+      "source": "C:\\Users\\dell\\.codex\\generated_images\\01a129ba-38ed-77b0-8b02-e9f4146ef5a2\\exec-c936fd11-051e-446d-a381-3a9d41e849d3.png",
+      "prompt": "Use case: logo-brand. Asset type: independent professional Syslume identity approval concept 05 of 10. Square 1024x1024 warm ivory presentation. Exact label at top left: \"05 / VALLEY CONTOURS\". Main central logo: An open rounded square containing three elegantly nested asymmetric topographic contour loops, with a tiny warm brass focal point. Geometric, bold enough for an app icon; map-reading metaphor drawn from northern Pakistan landscapes. Pine on ivory. No mountain silhouette, no letter S, no globe. Place refined premium sans-serif wordmark 'Syslume' beneath. Small monochrome mark and app-size silhouette along bottom. Crisp vector-like contours, generous negative space, excellent original identity design. No 3D, gradients, shadows, photo mockups, watermarks, flags, religious symbolism. One distinct direction, no extra variants.",
+      "approval": "not approved for integration"
+    },
+    {
+      "id": "06",
+      "name": "Crafted window",
+      "description": "An architectural portal inspired by precise joinery.",
+      "key": "logo06",
+      "file": "logo-06.png",
+      "kind": "logo",
+      "source": "C:\\Users\\dell\\.codex\\generated_images\\01a129ba-38ed-77b0-8b02-e9f4146ef5a2\\exec-3653884d-9c34-4c34-a2b6-af88087b80a8.png",
+      "prompt": "Use case: logo-brand. Asset type: professional flat vector-style identity concept 06 of 10 for Syslume. Square warm ivory board with exact top-left label \"06 / CRAFTED WINDOW\". Central emblem: a deep pine green upright rectangular portal constructed from TWO mirrored thick vertical bracket pieces joined by a narrow bottom sill. A small brass horizontal join at the TOP CENTRE. A single perfectly empty rectangular window within. Contemporary precise architectural joinery, conceptually inspired by Balti woodcraft but rendered ONLY as flat solid-color shapes. ABSOLUTELY no wood texture, materials, gradients, shadows, bevels, photography or 3D. Do not create a rotational knot, hooked cross, swastika, maze, religious/political symbol. Refined geometric sans-serif wordmark \"Syslume\" beneath. Small one-color version and tiny app icon at bottom. Bold simple original silhouette, exceptional negative-space proportions, corporate-tech elegance. No mountain, circle, sun, S monogram, watermarks.",
+      "approval": "not approved for integration"
+    },
+    {
+      "id": "07",
+      "name": "Horizon observer",
+      "description": "An instrument-like horizon and observation point.",
+      "key": "logo07",
+      "file": "logo-07.png",
+      "kind": "logo",
+      "source": "C:\\Users\\dell\\.codex\\generated_images\\01a129ba-38ed-77b0-8b02-e9f4146ef5a2\\exec-904f6e9c-90f9-4181-8fc4-fb04d76fcd16.png",
+      "prompt": "Use case: logo-brand. Asset type: independent professional Syslume identity approval concept 07 of 10. Square 1024x1024 warm ivory presentation. Exact label at top left: \"07 / HORIZON OBSERVER\". Main central logo: A simple bold horizontal horizon line with a half-disc above and a compact offset observation point beneath, forming a distinctive minimalist instrument. Inspired conceptually by Chitral's attentive observation of light and landscape, without copying sacred/community symbols. Deep pine and brass. No crescent, eye icon, flag, rays, mountains. Place refined premium sans-serif wordmark 'Syslume' beneath. Small monochrome mark and app-size silhouette along bottom. Crisp vector-like contours, generous negative space, excellent original identity design. No 3D, gradients, shadows, photo mockups, watermarks, flags, religious symbolism. One distinct direction, no extra variants.",
+      "approval": "not approved for integration"
+    },
+    {
+      "id": "08",
+      "name": "System prism",
+      "description": "Complex inputs resolved into an ordered beam.",
+      "key": "logo08",
+      "file": "logo-08.png",
+      "kind": "logo",
+      "source": "C:\\Users\\dell\\.codex\\generated_images\\01a129ba-38ed-77b0-8b02-e9f4146ef5a2\\exec-5e72095d-5a33-485a-b1a0-01629c29b042.png",
+      "prompt": "Use case: logo-brand. Asset type: independent professional Syslume identity approval concept 08 of 10. Square 1024x1024 warm ivory presentation. Exact label at top left: \"08 / SYSTEM PRISM\". Main central logo: An asymmetric flat faceted hexagonal prism split into three broad geometric planes, an ivory beam entering and a single ordered brass exit. Suggest transformation of complex system data into clarity. Solid shapes, crisp silhouette, deep pine. No gradients, 3D render, mountains, circles, monogram. Place refined premium sans-serif wordmark 'Syslume' beneath. Small monochrome mark and app-size silhouette along bottom. Crisp vector-like contours, generous negative space, excellent original identity design. No 3D, gradients, shadows, photo mockups, watermarks, flags, religious symbolism. One distinct direction, no extra variants.",
+      "approval": "not approved for integration"
+    },
+    {
+      "id": "09",
+      "name": "Modular intelligence",
+      "description": "Six modules arranged as a compact treemap.",
+      "key": "logo09",
+      "file": "logo-09.png",
+      "kind": "logo",
+      "source": "C:\\Users\\dell\\.codex\\generated_images\\01a129ba-38ed-77b0-8b02-e9f4146ef5a2\\exec-fabdd458-4d06-454e-b494-432ce7b2e593.png",
+      "prompt": "Use case: logo-brand. Asset type: independent professional Syslume identity approval concept 09 of 10. Square 1024x1024 warm ivory presentation. Exact label at top left: \"09 / MODULAR INTELLIGENCE\". Main central logo: A precise irregular arrangement of six rectangular modules with deliberate negative-space channels and one tiny brass tile, producing a distinctive compact stepped silhouette. Suggest a treemap and six monitoring modules. Bold pine geometry, minimal and balanced. No generic four-square Windows logo, mountain, sun, circuit, letter S. Place refined premium sans-serif wordmark 'Syslume' beneath. Small monochrome mark and app-size silhouette along bottom. Crisp vector-like contours, generous negative space, excellent original identity design. No 3D, gradients, shadows, photo mockups, watermarks, flags, religious symbolism. One distinct direction, no extra variants.",
+      "approval": "not approved for integration"
+    },
+    {
+      "id": "10",
+      "name": "Quiet wordmark",
+      "description": "A typographic identity with a light-cut l.",
+      "key": "logo10",
+      "file": "logo-10.png",
+      "kind": "logo",
+      "source": "C:\\Users\\dell\\.codex\\generated_images\\01a129ba-38ed-77b0-8b02-e9f4146ef5a2\\exec-7f57bcbd-5673-43f1-9191-0ecf14bb483c.png",
+      "prompt": "Use case: logo-brand. Asset type: independent professional Syslume identity approval concept 10 of 10. Square 1024x1024 warm ivory presentation. Exact label at top left: \"10 / QUIET WORDMARK\". Main central logo: An entirely typographic brand: custom lowercase 'syslume' with a subtly joined y-s ligature, a cut in the l that evokes light, beautiful humanist proportions. Bold compact pine typography. A standalone small 'sl' ligature for app-icon use. No illustrative symbol, mountain, circle, diamond, generic stock font. The main wordmark reads exactly 'syslume'; no second competing main wordmark. Small monochrome mark and app-size silhouette along bottom. Crisp vector-like contours, generous negative space, excellent original identity design. No 3D, gradients, shadows, photo mockups, watermarks, flags, religious symbolism. One distinct direction, no extra variants.",
+      "approval": "not approved for integration"
+    },
+    {
+      "id": "A",
+      "name": "Clarity at the summit",
+      "placement": "First-run welcome",
+      "description": "An imagined Karakoram landscape viewed through a clear observation window.",
+      "key": "storyA",
+      "file": "story-a.png",
+      "kind": "story",
+      "source": "C:\\Users\\dell\\.codex\\generated_images\\01a129ba-38ed-77b0-8b02-e9f4146ef5a2\\exec-38956a54-95fe-4484-aa28-241a54d79038.png",
+      "prompt": "Use case: illustration-story. Asset type: Syslume storytelling image A, \"Clarity at the summit\", approval-only. Generate a polished high-resolution landscape 1536x1024 editorial illustration. A poetic contemporary landscape inspired by Baltistan: dramatic angular Karakoram ridges and a glacial turquoise river seen as elegant layered cut-paper sculpture. In the foreground a small translucent glass observation window frames the distant ridges into a clear orderly view. Gentle morning brass light, deep pine lower mountains, pale limestone sky. Connect exploration of terrain to understanding a computer without depicting any literal software or screens. Landscape concentrated on the right; calm usable negative space left. Suitable for first-run welcome. Consistent visual family: sculptural paper-and-wood relief, subtle material texture, premium warm ivory backdrop, pine green #174C43, muted jade #78AA96, limestone #EFECE3, soft brass #B59558. Soft natural light, refined deliberate geometry and ample negative space. Product-relevant and calm, not a tourism advertisement. No text, no logos, no watermarks, no UI charts, no flags, no crescents, no mosques, no copied sacred motifs, no clutter, no generic futuristic neon.",
+      "approval": "approved, recolored for green/ivory/charcoal/brass palette"
+    },
+    {
+      "id": "B",
+      "name": "A map of what matters",
+      "placement": "Storage before the first scan",
+      "description": "Terrain parcels connect exploration with mapping disk space.",
+      "key": "storyB",
+      "file": "story-b.png",
+      "kind": "story",
+      "source": "C:\\Users\\dell\\.codex\\generated_images\\01a129ba-38ed-77b0-8b02-e9f4146ef5a2\\exec-2ff65502-0e93-4227-af1e-9223bdcd3c3c.png",
+      "prompt": "Use case: illustration-story. Asset type: Syslume storytelling image B, \"A map of what matters\", approval-only. Generate a polished high-resolution landscape 1536x1024 editorial illustration. An abstract floating atlas tile, viewed from a gentle top-down oblique angle: clean rectangular terrain parcels of different sizes arranged like a disk-usage treemap, traversed by one jade river and precise contour lines. Northern Pakistan terrain as inspiration, warm sandstone blocks, pine blocks, tiny brass details. A small minimal survey lens reveals one parcel clearly. High-end editorial papercraft with quiet tactile texture. Suitable for the storage module's before-first-scan empty state. Calm composition, balanced and uncluttered. Consistent visual family: sculptural paper-and-wood relief, subtle material texture, premium warm ivory backdrop, pine green #174C43, muted jade #78AA96, limestone #EFECE3, soft brass #B59558. Soft natural light, refined deliberate geometry and ample negative space. Product-relevant and calm, not a tourism advertisement. No text, no logos, no watermarks, no UI charts, no flags, no crescents, no mosques, no copied sacred motifs, no clutter, no generic futuristic neon.",
+      "approval": "not approved for integration"
+    },
+    {
+      "id": "C",
+      "name": "Patterns into insight",
+      "placement": "Optional About panel",
+      "description": "Timber, stone and a dawn horizon connect craft with careful observation.",
+      "key": "storyC",
+      "file": "story-c.png",
+      "kind": "story",
+      "source": "C:\\Users\\dell\\.codex\\generated_images\\01a129ba-38ed-77b0-8b02-e9f4146ef5a2\\exec-10643607-c3b2-40e4-bbbb-4b0e3e1809b9.png",
+      "prompt": "Use case: illustration-story. Asset type: Syslume storytelling image C, \"Patterns into insight\", approval-only. Generate a polished high-resolution landscape 1536x1024 editorial illustration. A contemplative abstract desk sculpture: a restrained geometric timber lattice inspired by Balti joinery frames an open window looking toward broad Hindu Kush foothills and the dawn horizon, with five small precise points forming a subtle observational trajectory overhead. Soft walnut material, stone plaster, pine and brass highlights. Conceptual connection to careful observation associated with Chitral; no depiction or borrowing of religious/ceremonial symbols, no people or stereotyped costume. Suitable for an optional 'About Syslume' storytelling panel. Consistent visual family: sculptural paper-and-wood relief, subtle material texture, premium warm ivory backdrop, pine green #174C43, muted jade #78AA96, limestone #EFECE3, soft brass #B59558. Soft natural light, refined deliberate geometry and ample negative space. Product-relevant and calm, not a tourism advertisement. No text, no logos, no watermarks, no UI charts, no flags, no crescents, no mosques, no copied sacred motifs, no clutter, no generic futuristic neon.",
+      "approval": "not approved for integration"
+    }
+  ],
+  "finalizedAssets": {
+    "welcome": {
+      "runtime": "../../public/images/syslume-welcome.webp",
+      "edit": "Approved A recolored to forest/sage/olive, warm ivory and stone sky, charcoal/forest mountains, brass highlights. No pink, blue, cyan, teal-blue or red. Existing composition, window, landscape and texture retained.",
+      "source": "C:/Users/dell/.codex/generated_images/01a129ba-38ed-77b0-8b02-e9f4146ef5a2/exec-aae86172-cc7c-49c3-ba9f-329982a7b4c0.png"
+    },
+    "logo": {
+      "vector": "../../public/syslume-mark.svg",
+      "icon": "../../public/syslume-app-icon.svg",
+      "source": "User-selected original attached 03",
+      "reference": "branding/approved-reference.png"
+    }
+  }
+}

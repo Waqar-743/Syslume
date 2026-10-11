@@ -35,75 +35,75 @@ export function percentage(value: number, total: number): number {
 export function getExtensionColor(ext: string): string {
   const colors: Record<string, string> = {
     // Documents
-    pdf: "#e74c3c",
-    doc: "#2980b9",
-    docx: "#2980b9",
-    xls: "#27ae60",
-    xlsx: "#27ae60",
-    ppt: "#e67e22",
-    pptx: "#e67e22",
-    txt: "#95a5a6",
+    pdf: "#455e3f",
+    doc: "#b1a17e",
+    docx: "#b1a17e",
+    xls: "#6e8254",
+    xlsx: "#6e8254",
+    ppt: "#6e8254",
+    pptx: "#6e8254",
+    txt: "#6e8254",
     
     // Images
-    jpg: "#9b59b6",
-    jpeg: "#9b59b6",
-    png: "#8e44ad",
-    gif: "#1abc9c",
-    svg: "#f39c12",
-    webp: "#9b59b6",
-    bmp: "#9b59b6",
+    jpg: "#6e8254",
+    jpeg: "#6e8254",
+    png: "#8f8b7c",
+    gif: "#455e3f",
+    svg: "#6e8254",
+    webp: "#6e8254",
+    bmp: "#6e8254",
     
     // Videos
-    mp4: "#e74c3c",
-    mkv: "#c0392b",
-    avi: "#e74c3c",
-    mov: "#e74c3c",
-    wmv: "#e74c3c",
+    mp4: "#455e3f",
+    mkv: "#a58b4b",
+    avi: "#455e3f",
+    mov: "#455e3f",
+    wmv: "#455e3f",
     
     // Audio
-    mp3: "#3498db",
-    wav: "#2980b9",
-    flac: "#1abc9c",
-    aac: "#3498db",
+    mp3: "#b1a17e",
+    wav: "#b1a17e",
+    flac: "#455e3f",
+    aac: "#b1a17e",
     
     // Archives
-    zip: "#f1c40f",
-    rar: "#f39c12",
-    "7z": "#e67e22",
-    tar: "#d35400",
-    gz: "#d35400",
+    zip: "#8f8b7c",
+    rar: "#6e8254",
+    "7z": "#6e8254",
+    tar: "#455e3f",
+    gz: "#455e3f",
     
     // Code
-    js: "#f1c40f",
-    ts: "#3498db",
-    jsx: "#61dafb",
-    tsx: "#61dafb",
-    py: "#3776ab",
-    rs: "#dea584",
-    go: "#00add8",
-    java: "#b07219",
-    cpp: "#f34b7d",
-    c: "#555555",
-    html: "#e34c26",
-    css: "#563d7c",
-    json: "#292929",
+    js: "#8f8b7c",
+    ts: "#b1a17e",
+    jsx: "#8f8b7c",
+    tsx: "#8f8b7c",
+    py: "#8f8b7c",
+    rs: "#6e8254",
+    go: "#879276",
+    java: "#b1a17e",
+    cpp: "#8f8b7c",
+    c: "#b1a17e",
+    html: "#879276",
+    css: "#455e3f",
+    json: "#b1a17e",
     
     // Executables
-    exe: "#2c3e50",
-    dll: "#34495e",
-    msi: "#2c3e50",
+    exe: "#6e8254",
+    dll: "#6e8254",
+    msi: "#6e8254",
     
     // System
-    sys: "#7f8c8d",
-    log: "#95a5a6",
-    ini: "#bdc3c7",
-    cfg: "#bdc3c7",
+    sys: "#b1a17e",
+    log: "#6e8254",
+    ini: "#a58b4b",
+    cfg: "#a58b4b",
     
     // Default
-    "<none>": "#636e72",
+    "<none>": "#879276",
   };
   
-  return colors[ext.toLowerCase()] || "#636e72";
+  return colors[ext.toLowerCase()] || "#879276";
 }
 
 /**

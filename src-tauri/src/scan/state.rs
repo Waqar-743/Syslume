@@ -45,6 +45,9 @@ impl AppState {
 
     pub fn finish_scan(&self, scan_id: &str, result: ScanResult) {
         if let Ok(mut guard) = self.results.lock() {
+            // Full trees are large. IPC retains only the current result;
+            // historical summaries are stored separately by the frontend.
+            guard.clear();
             guard.insert(scan_id.to_string(), result);
         }
         if let Ok(mut guard) = self.active_scans.lock() {

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
+import { isTauri } from "@tauri-apps/api/core";
 import { FORMAT_SIZE } from "../constants";
 import type { RootEntry, ScanHistoryEntry } from "../types";
 
@@ -12,15 +13,19 @@ interface HomeViewProps {
 
 export default function HomeView({ drives, history, isLoading, onSelectDrive }: HomeViewProps) {
   const [pickingFolder, setPickingFolder] = useState(false);
+  const [pickerError, setPickerError] = useState<string | null>(null);
 
   const chooseFolder = async () => {
     setPickingFolder(true);
+    setPickerError(null);
     try {
       const selected = await open({ directory: true, multiple: false, title: "Choose a folder to inspect" });
       if (typeof selected === "string") {
         const name = selected.split(/[\\/]/).filter(Boolean).pop() || selected;
         onSelectDrive({ name, path: selected, total_bytes: 0, available_bytes: 0 });
       }
+    } catch (error) {
+      setPickerError(`Could not open the folder picker: ${String(error)}`);
     } finally {
       setPickingFolder(false);
     }
@@ -34,13 +39,15 @@ export default function HomeView({ drives, history, isLoading, onSelectDrive }: 
           <h1>See what your disk is <em>really</em> holding.</h1>
           <p>Map every heavy folder, surface old files and exact duplicates, then move reviewed clutter to trash from one focused workspace.</p>
           <div className="hero-actions">
-            <button className="primary-action" onClick={chooseFolder} disabled={pickingFolder}>
+            <button className="primary-action" onClick={chooseFolder} disabled={pickingFolder || !isTauri()}>
               <span>Choose a folder</span><b>{pickingFolder ? "…" : "↗"}</b>
             </button>
             {drives[0] && <button className="quiet-action" onClick={() => onSelectDrive(drives[0])}>Scan primary drive</button>}
           </div>
+          {pickerError && <p role="alert">{pickerError}</p>}
+          {!isTauri() && <p>Open the desktop app to read drives and choose folders.</p>}
         </div>
-        <div className="hero-instrument" aria-label="DiskSight capabilities">
+        <div className="hero-instrument" aria-label="Syslume capabilities">
           <div className="instrument-ring"><span>SCAN</span><strong>→</strong></div>
           <dl>
             <div><dt>Analysis</dt><dd>Size · age · type</dd></div>

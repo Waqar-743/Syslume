@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useDialog } from "../useDialog";
 import type { AppSettings } from "../types";
 
 interface SettingsViewProps {
@@ -14,13 +15,15 @@ function Toggle({ checked, onChange, label, detail }: { checked: boolean; onChan
 }
 
 export default function SettingsView({ settings, onUpdateSettings, onClose }: SettingsViewProps) {
+  const dialogRef = useRef<HTMLElement>(null);
+  useDialog(dialogRef, true, onClose);
   const [excludeText, setExcludeText] = useState(settings.excludePatterns.join("\n"));
   const saveExclusions = () => onUpdateSettings({ excludePatterns: excludeText.split(/\r?\n/).map((value) => value.trim()).filter(Boolean) });
 
   return (
     <div className="drawer-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <aside className="settings-drawer" aria-label="Settings">
-        <header><div><span className="eyebrow"><b>Preferences</b></span><h2>Scan settings</h2></div><button className="icon-button" onClick={onClose}>×</button></header>
+      <aside ref={dialogRef} className="settings-drawer" role="dialog" aria-modal="true" aria-label="Settings">
+        <header><div><span className="eyebrow"><b>Preferences</b></span><h2>Scan settings</h2></div><button className="icon-button" aria-label="Close settings" onClick={onClose}>×</button></header>
         <div className="settings-content">
           <section>
             <h3>Appearance</h3>

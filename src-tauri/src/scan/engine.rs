@@ -143,14 +143,15 @@ pub fn run_scan(
     builder.max_depth(options.max_depth.map(|d| d as usize));
     // Performance optimizations
     builder.skip_stdout(true); // Skip stdout for better performance
-    builder.hidden(!options.include_hidden);
     builder.git_ignore(false); // Don't use gitignore rules
     builder.git_global(false);
     builder.git_exclude(false);
     builder.ignore(false); // Don't use .ignore files
     builder.standard_filters(false); // Disable all standard filters for speed
+    builder.hidden(!options.include_hidden);
 
     let include_system_dirs = options.include_system_dirs;
+    let include_hidden = options.include_hidden;
     let exclude_patterns: Vec<String> = options
         .exclude_patterns
         .iter()
@@ -160,6 +161,13 @@ pub fn run_scan(
 
     // Apply the selected system-directory and custom exclusions.
     builder.filter_entry(move |entry| {
+        #[cfg(windows)]
+        if !include_hidden && entry.depth() > 0 {
+            use std::os::windows::fs::MetadataExt;
+            if entry.metadata().is_ok_and(|m| m.file_attributes() & 2 != 0) { return false; }
+        }
+        #[cfg(not(windows))]
+        let _ = include_hidden;
         let normalized = entry.path().to_string_lossy().to_lowercase();
         if exclude_patterns
             .iter()
@@ -180,8 +188,7 @@ pub fn run_scan(
     let mut walker = builder.build();
 
     while let Some(entry) = walker.next() {
-        // Check cancellation every 5000 entries for better performance
-        if visited_entries % 5000 == 0 && cancel_flag.load(Ordering::Relaxed) {
+        if cancel_flag.load(Ordering::Relaxed) {
             return Err(ScanError::Canceled);
         }
         match entry {
@@ -641,6 +648,21 @@ mod tests {
         let path = Path::new("archive.tar.gz");
         let ext = extract_extension(path).expect("extension");
         assert_eq!(ext, "gz");
+    }
+
+    #[test]
+    fn hidden_and_custom_exclusions_are_respected() {
+        let temp = tempdir().unwrap();
+        write(temp.path().join("visible.bin"), vec![0; 3]).unwrap();
+        write(temp.path().join(".hidden.bin"), vec![0; 5]).unwrap();
+        create_dir_all(temp.path().join("excluded")).unwrap();
+        write(temp.path().join("excluded/large.bin"), vec![0; 20]).unwrap();
+        let root = temp.path().to_string_lossy().to_string();
+        let options = ScanOptions { exclude_patterns: vec!["excluded".into()], ..Default::default() };
+        let first = run_scan(None, "filters".into(), root.clone(), options.clone(), Arc::new(AtomicBool::new(false))).unwrap();
+        assert_eq!(first.total_bytes, 3);
+        let second = run_scan(None, "hidden".into(), root, ScanOptions { include_hidden: true, ..options }, Arc::new(AtomicBool::new(false))).unwrap();
+        assert_eq!(second.total_bytes, 8);
     }
 
     #[test]

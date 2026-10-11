@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { FORMAT_SIZE } from "../constants";
 import type { TreeNodeMap } from "../App";
 import type { AppSettings, DeleteResult, DuplicateGroup, NodeId, ScanHistoryEntry, ScanSummary, TreeNodeDelta } from "../types";
+import StorageTreemap from "./StorageTreemap";
+import { useDialog } from "../useDialog";
 
 interface DashboardViewProps {
   summary: ScanSummary;
@@ -13,6 +15,7 @@ interface DashboardViewProps {
   settings: AppSettings;
   scanWarnings: string[];
   onRescan: () => void;
+  onNewScan: () => void;
   onCleanPaths: (paths: string[]) => Promise<DeleteResult>;
   onNotify: (message: string, tone?: "good" | "bad" | "neutral") => void;
 }
@@ -63,6 +66,7 @@ function downloadFile(name: string, type: string, content: string) {
 export default function DashboardView(props: DashboardViewProps) {
   const { summary, treeNodes, rootNodeId, rootPath, history, settings, scanWarnings, onRescan, onCleanPaths, onNotify } = props;
   const [tab, setTab] = useState<WorkspaceTab>("overview");
+  useEffect(() => { window.scrollTo(0, 0); }, [tab]);
   const [query, setQuery] = useState("");
   const [kindFilter, setKindFilter] = useState<"all" | "file" | "dir" | "old">("all");
   const [selectedNode, setSelectedNode] = useState<IndexedNode | null>(null);
@@ -71,6 +75,9 @@ export default function DashboardView(props: DashboardViewProps) {
   const [cleaning, setCleaning] = useState(false);
   const [duplicates, setDuplicates] = useState<DuplicateGroup[] | null>(null);
   const [duplicateLoading, setDuplicateLoading] = useState(false);
+  const reviewRef = useRef<HTMLElement>(null);
+  const closeReview = useCallback(() => { if (!cleaning) setReviewOpen(false); }, [cleaning]);
+  useDialog(reviewRef, reviewOpen, closeReview);
 
   const nodes = useMemo(() => Object.values(treeNodes), [treeNodes]);
   const files = useMemo(() => nodes.filter((node) => node.kind === "file"), [nodes]);
@@ -102,7 +109,17 @@ export default function DashboardView(props: DashboardViewProps) {
     }).sort((a, b) => b.size_bytes - a.size_bytes).slice(0, 1000);
   }, [nodes, query, kindFilter, oldestCutoff]);
 
-  const selectedCleanupNodes = useMemo(() => [...cleanupSelection].map((path) => files.find((node) => node.path === path)).filter(Boolean) as IndexedNode[], [cleanupSelection, files]);
+  const selectedCleanupNodes = useMemo(() => {
+    const candidates = new Map(files.map(n => [n.path, n]));
+    for (const group of duplicates || []) for (const file of group.files) {
+      if (!candidates.has(file.path)) candidates.set(file.path, {
+        id: -candidates.size-1, parent: null, kind: "file", children: [],
+        path: file.path, name: file.path.split(/[\\/]/).pop() || file.path,
+        size_bytes: file.size_bytes, file_ext: null,
+      });
+    }
+    return [...cleanupSelection].map(path => candidates.get(path)).filter((node): node is IndexedNode => Boolean(node));
+  }, [cleanupSelection, files, duplicates]);
   const selectionBytes = selectedCleanupNodes.reduce((sum, node) => sum + node.size_bytes, 0);
 
   const toggleCleanup = (path: string) => setCleanupSelection((current) => {
@@ -110,13 +127,15 @@ export default function DashboardView(props: DashboardViewProps) {
   });
 
   const runCleanup = async () => {
+    if (selectedCleanupNodes.length !== cleanupSelection.size) { onNotify("Some selected items could not be resolved. Rebuild the selection before cleanup.", "bad"); return; }
     setCleaning(true);
     try {
       const result = await onCleanPaths([...cleanupSelection]);
-      if (result.bytes_freed > 0) {
+      if (result.files_deleted + result.folders_deleted > 0) {
         setCleanupSelection(new Set()); setReviewOpen(false); onRescan();
       }
-    } finally { setCleaning(false); }
+    } catch (error) { onNotify(`Cleanup failed: ${error}`, "bad"); }
+    finally { setCleaning(false); }
   };
 
   const findDuplicates = async () => {
@@ -133,11 +152,11 @@ export default function DashboardView(props: DashboardViewProps) {
     const next = new Set(current); group.files.slice(1).forEach((file) => next.add(file.path)); return next;
   });
 
-  const exportJson = () => downloadFile("disksight-report.json", "application/json", JSON.stringify({ rootPath, scannedAt: new Date().toISOString(), summary, nodes }, null, 2));
+  const exportJson = () => downloadFile("syslume-report.json", "application/json", JSON.stringify({ rootPath, scannedAt: new Date().toISOString(), summary, nodes }, null, 2));
   const exportCsv = () => {
     const escape = (value: string) => `"${value.replace(/"/g, '""')}"`;
     const rows = ["name,path,kind,size_bytes,extension,modified", ...nodes.map((node) => [escape(node.name), escape(node.path), node.kind, node.size_bytes, node.file_ext || "", node.modified_unix || ""].join(","))];
-    downloadFile("disksight-report.csv", "text/csv", rows.join("\r\n"));
+    downloadFile("syslume-report.csv", "text/csv", rows.join("\r\n"));
   };
 
   return (
@@ -149,8 +168,8 @@ export default function DashboardView(props: DashboardViewProps) {
             <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}><span>{String(index + 1).padStart(2, "0")}</span>{item}{item === "cleanup" && cleanupCandidates.length > 0 && <b>{cleanupCandidates.length}</b>}</button>
           ))}
         </nav>
-        <div className="nav-actions"><button onClick={exportCsv}>Export CSV</button><button onClick={exportJson}>Export JSON</button><button onClick={onRescan}>Rescan</button></div>
-        <div className="safety-note"><i>✓</i><span><strong>Trash-only cleanup</strong>DiskSight will not silently delete permanently.</span></div>
+        <div className="nav-actions"><button onClick={props.onNewScan}>Choose another location</button><button onClick={exportCsv}>Export CSV</button><button onClick={exportJson}>Export JSON</button><button onClick={onRescan}>Rescan</button></div>
+        <div className="safety-note"><i>✓</i><span><strong>Trash-only cleanup</strong>Syslume will not silently delete permanently.</span></div>
       </aside>
 
       <section className="workspace-content">
@@ -162,6 +181,7 @@ export default function DashboardView(props: DashboardViewProps) {
             <article><span>Review candidates</span><strong>{FORMAT_SIZE(reclaimable)}</strong><small>{cleanupCandidates.length} explainable suggestions</small></article>
             <article><span>Older than {settings.oldFileDays}d</span><strong>{FORMAT_SIZE(oldFiles.reduce((sum, file) => sum + file.size_bytes, 0))}</strong><small>{oldFiles.length.toLocaleString()} files</small></article>
           </div>
+          <StorageTreemap nodes={treeNodes} root={rootNodeId} onInspect={id => { setSelectedNode(treeNodes[id]); setTab("explorer"); }}/>
           <div className="overview-grid">
             <section className="space-map panel"><div className="panel-heading"><div><span>Largest folders</span><h2>Where space gathers</h2></div><button onClick={() => setTab("explorer")}>Open explorer ↗</button></div>
               <div className="space-map-list">{largestDirectories.map((directory, index) => <button key={directory.id} onClick={() => { setSelectedNode(directory); setTab("explorer"); }}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{directory.name}</strong><small>{directory.path}</small></div><i><b style={{ transform: `scaleX(${summary.total_bytes ? directory.size_bytes / summary.total_bytes : 0})` }} /></i><em>{FORMAT_SIZE(directory.size_bytes)}</em></button>)}</div>
@@ -182,11 +202,11 @@ export default function DashboardView(props: DashboardViewProps) {
         {tab === "cleanup" && <>
           <header className="workspace-heading compact-heading"><div><span className="eyebrow"><b>Cleanup</b> explainable suggestions</span><h1>Review before reclaiming.</h1></div><p>Suggestions are never executed automatically. Select only the items you recognize.</p></header>
           <div className="cleanup-summary"><div><span>Potential space</span><strong>{FORMAT_SIZE(reclaimable)}</strong><small>{cleanupCandidates.length} candidate files</small></div><div><span>Selected</span><strong>{FORMAT_SIZE(selectionBytes)}</strong><small>{cleanupSelection.size} items</small></div><button className="primary-action" disabled={!cleanupSelection.size} onClick={() => setReviewOpen(true)}><span>Review selection</span><b>→</b></button></div>
-          <section className="candidate-list panel">{cleanupCandidates.length === 0 ? <EmptyState title="Nothing obvious to clean" detail="DiskSight did not find temporary, cache, backup, or large log files in this reading." /> : cleanupCandidates.map(({ node, insight }) => <label className="candidate-row" key={node.id}><input type="checkbox" checked={cleanupSelection.has(node.path)} onChange={() => toggleCleanup(node.path)} /><i /><span className={`risk-tag risk-${insight.risk}`}>{insight.risk === "low" ? "lower risk" : "review"}</span><div><strong>{node.name}</strong><small>{node.path}</small></div><em>{insight.reason}</em><b>{FORMAT_SIZE(node.size_bytes)}</b></label>)}</section>
+          <section className="candidate-list panel">{cleanupCandidates.length === 0 ? <EmptyState title="Nothing obvious to clean" detail="Syslume did not find temporary, cache, backup, or large log files in this reading." /> : cleanupCandidates.map(({ node, insight }) => <label className="candidate-row" key={node.id}><input type="checkbox" checked={cleanupSelection.has(node.path)} onChange={() => toggleCleanup(node.path)} /><i /><span className={`risk-tag risk-${insight.risk}`}>{insight.risk === "low" ? "lower risk" : "review"}</span><div><strong>{node.name}</strong><small>{node.path}</small></div><em>{insight.reason}</em><b>{FORMAT_SIZE(node.size_bytes)}</b></label>)}</section>
         </>}
 
         {tab === "duplicates" && <>
-          <header className="workspace-heading compact-heading"><div><span className="eyebrow"><b>Duplicates</b> byte-level verification</span><h1>Find exact copies.</h1></div><p>DiskSight groups files by size, then verifies matching candidates with SHA-256. The original file is never selected automatically.</p></header>
+          <header className="workspace-heading compact-heading"><div><span className="eyebrow"><b>Duplicates</b> byte-level verification</span><h1>Find exact copies.</h1></div><p>Syslume groups files by size, then verifies matching candidates with SHA-256. The original file is never selected automatically.</p></header>
           <div className="duplicate-command"><div><span>Minimum file size</span><strong>{settings.duplicateMinSizeMb} MB</strong><small>Change this threshold in settings</small></div><button className="primary-action" onClick={findDuplicates} disabled={duplicateLoading}><span>{duplicateLoading ? "Hashing candidates…" : duplicates ? "Run again" : "Find duplicates"}</span><b>{duplicateLoading ? "…" : "⌁"}</b></button></div>
           {duplicates === null ? <EmptyState title="Duplicate analysis is on demand" detail="Hashing reads candidate files from disk, so it runs separately from the fast size scan." /> : duplicates.length === 0 ? <EmptyState title="No exact duplicates found" detail="Try lowering the minimum size threshold if you want a broader search." /> : <div className="duplicate-groups">{duplicates.map((group, index) => <article className="panel" key={group.hash}><header><span>Set {String(index + 1).padStart(2, "0")}</span><strong>{group.files.length} exact copies</strong><b>{FORMAT_SIZE(group.reclaimable_bytes)} reclaimable</b><button onClick={() => { addDuplicateCopies(group); onNotify("Duplicate copies added to cleanup review"); }}>Review extra copies</button></header>{group.files.map((file, fileIndex) => <div className="duplicate-file" key={file.path}><i>{fileIndex === 0 ? "KEEP" : "COPY"}</i><span>{file.path}</span><b>{FORMAT_SIZE(file.size_bytes)}</b></div>)}</article>)}</div>}
         </>}
@@ -198,13 +218,13 @@ export default function DashboardView(props: DashboardViewProps) {
       </section>
 
       {cleanupSelection.size > 0 && !reviewOpen && <button className="floating-review" onClick={() => setReviewOpen(true)}><span>{cleanupSelection.size}</span><strong>Review cleanup</strong><b>{FORMAT_SIZE(selectionBytes)} →</b></button>}
-      {reviewOpen && <div className="drawer-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setReviewOpen(false)}><aside className="review-drawer"><header><div><span className="eyebrow"><b>Final review</b></span><h2>Move to trash</h2></div><button className="icon-button" onClick={() => setReviewOpen(false)}>×</button></header><div className="review-total"><span>Selected reclaim</span><strong>{FORMAT_SIZE(selectionBytes)}</strong><small>{selectedCleanupNodes.length} items will be sent to the operating system trash.</small></div><div className="review-list">{selectedCleanupNodes.map((node) => <article key={node.path}><div><strong>{node.name}</strong><small>{node.path}</small></div><b>{FORMAT_SIZE(node.size_bytes)}</b><button onClick={() => toggleCleanup(node.path)}>Remove</button></article>)}</div><footer><p>DiskSight blocks protected system paths in the Rust backend. Trash availability still depends on your operating system and volume.</p><button className="danger-action" onClick={runCleanup} disabled={cleaning}>{cleaning ? "Moving items…" : "Confirm and move to trash"}</button></footer></aside></div>}
+      {reviewOpen && <div className="drawer-backdrop" onMouseDown={(event) => event.target === event.currentTarget && closeReview()}><aside ref={reviewRef} className="review-drawer" role="dialog" aria-modal="true" aria-label="Review cleanup selection"><header><div><span className="eyebrow"><b>Final review</b></span><h2>Move to Recycle Bin</h2></div><button className="icon-button" aria-label="Close cleanup review" disabled={cleaning} onClick={closeReview}>×</button></header><div className="review-total"><span>Selected size</span><strong>{FORMAT_SIZE(selectionBytes)}</strong><small>{selectedCleanupNodes.length} items will be sent to the Recycle Bin. Space is released when you empty it.</small></div><div className="review-list">{selectedCleanupNodes.map((node) => <article key={node.path}><div><strong>{node.name}</strong><small>{node.path}</small></div><b>{FORMAT_SIZE(node.size_bytes)}</b><button onClick={() => toggleCleanup(node.path)}>Remove</button></article>)}</div><footer><p>Syslume blocks protected system paths in the Rust backend. Trash availability still depends on your operating system and volume.</p><button className="danger-action" onClick={runCleanup} disabled={cleaning}>{cleaning ? "Moving items…" : "Confirm and move to Recycle Bin"}</button></footer></aside></div>}
     </div>
   );
 }
 
 function DataTable({ nodes, selected, onSelect, onOpen, onQueue }: { nodes: IndexedNode[]; selected: IndexedNode | null; onSelect: (node: IndexedNode) => void; onOpen: (path: string) => void; onQueue: (path: string) => void }) {
-  return <div className="data-table"><div className="data-table-head"><span>Name</span><span>Modified</span><span>Type</span><span>Size</span><span /></div>{nodes.map((node) => <button className={selected?.id === node.id ? "selected" : ""} key={node.id} onClick={() => onSelect(node)} onDoubleClick={() => onOpen(node.path)}><i className={`file-glyph ${node.kind}`}>{node.kind === "dir" ? "▰" : "▪"}</i><span className="file-name"><strong>{node.name}</strong><small>{node.path}</small></span><span>{formatDate(node.modified_unix)}</span><span>{node.kind === "dir" ? "Folder" : (node.file_ext || "File").toUpperCase()}</span><b>{FORMAT_SIZE(node.size_bytes)}</b><span className="row-actions"><em onClick={(event) => { event.stopPropagation(); onOpen(node.path); }}>Open</em>{node.kind === "file" && <em onClick={(event) => { event.stopPropagation(); onQueue(node.path); }}>Review</em>}</span></button>)}</div>;
+  return <div className="data-table"><div className="data-table-head"><span>Name</span><span>Modified</span><span>Type</span><span>Size</span><span /></div>{nodes.map((node) => <div className={`data-row ${selected?.id === node.id ? "selected" : ""}`} key={node.id} onClick={() => onSelect(node)} onDoubleClick={() => onOpen(node.path)}><i className={`file-glyph ${node.kind}`}>{node.kind === "dir" ? "▰" : "▪"}</i><button className="file-name" aria-label={`Select ${node.name}`} onClick={() => onSelect(node)}><strong>{node.name}</strong><small>{node.path}</small></button><span>{formatDate(node.modified_unix)}</span><span>{node.kind === "dir" ? "Folder" : (node.file_ext || "File").toUpperCase()}</span><b>{FORMAT_SIZE(node.size_bytes)}</b><span className="row-actions"><button aria-label={`Open ${node.name}`} onClick={(event) => { event.stopPropagation(); onOpen(node.path); }}>Open</button>{node.kind === "file" && <button aria-label={`Review ${node.name} for cleanup`} onClick={(event) => { event.stopPropagation(); onQueue(node.path); }}>Review</button>}</span></div>)}</div>;
 }
 
 function DetailPanel({ node, onOpen, onQueue }: { node: IndexedNode | null; onOpen: (path: string) => void; onQueue: (path: string) => void }) {

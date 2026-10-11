@@ -1,4 +1,5 @@
 pub mod scan;
+pub mod monitor;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -8,7 +9,9 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .manage(app_state)
+        .manage(monitor::MonitorState::new())
         .invoke_handler(tauri::generate_handler![
+            monitor::get_monitor_snapshot,
             scan::commands::start_scan,
             scan::commands::cancel_scan,
             scan::commands::get_scan_result,

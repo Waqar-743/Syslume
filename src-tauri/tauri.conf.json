@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "DiskSight",
-  "version": "1.0.0",
+  "productName": "Syslume",
+  "version": "1.1.0",
   "identifier": "com.dell.disksight",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -12,10 +12,10 @@
   "app": {
     "windows": [
       {
-        "title": "DiskSight - Disk Space Analyzer",
+        "title": "Syslume — System intelligence",
         "width": 1200,
         "height": 800,
-        "minWidth": 900,
+        "minWidth": 820,
         "minHeight": 600,
         "center": true
       }
@@ -27,6 +27,13 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "windows": {
+      "nsis": {
+        "headerImage": "icons/installer-header.bmp",
+        "sidebarImage": "icons/installer-sidebar.bmp",
+        "installerIcon": "icons/icon.ico"
+      }
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

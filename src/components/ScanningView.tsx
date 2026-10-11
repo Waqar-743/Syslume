@@ -15,7 +15,7 @@ export default function ScanningView({ progress, targetPath, elapsedMs, warnings
     <section className="scan-stage">
       <div className="scan-visual" aria-hidden="true">
         <div className="scan-orbit orbit-one" /><div className="scan-orbit orbit-two" />
-        <span className="scan-core">DS</span>
+        <span className="scan-core"><img src="/syslume-mark.svg" alt="" /></span>
       </div>
       <div className="scan-copy">
         <span className="eyebrow"><b>Live</b> filesystem walk</span>
